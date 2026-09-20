@@ -9,6 +9,10 @@
 #'   \item \code{data.csv}: IAMC wide format, one row per model, scenario,
 #'   region, variable and unit, with one column per year. May contain several
 #'   models and scenarios; \code{\link{calcLandInput}} selects one.
+#'   \item \code{country_cell.csv}: columns x, y and country (ISO3), the
+#'   country per grid cell of the target grid. Built from LUH3's own static
+#'   ccode field, so this path needs no MAgPIE run; see
+#'   scripts/luh_country_mask.py in the graft repository. May be gzipped.
 #'   \item \code{region_mapping.csv}: columns region and country, where region
 #'   matches the Region column of data.csv and country is an ISO3 code. The
 #'   region names of a common region set (R5, R10, ...) cover different
@@ -16,9 +20,10 @@
 #'   the model being read.
 #' }
 #'
-#' @param subtype data or regionMapping
+#' @param subtype data, regionMapping or countryCell
 #' @return for data, a data.frame in IAMC wide format; for regionMapping, a
-#' data.frame with columns region, country and lowRes
+#' data.frame with columns region, country and lowRes; for countryCell, a
+#' data.frame with columns x, y and country
 #'
 #' @author Ben Sanderson
 readIAMC <- function(subtype = "data") {
@@ -43,7 +48,19 @@ readIAMC <- function(subtype = "data") {
     return(list(x = mapping,
                 class = "data.frame",
                 description = "IAMC region mapping"))
+  } else if (subtype == "countryCell") {
+    file <- if (file.exists("country_cell.csv")) "country_cell.csv" else "country_cell.csv.gz"
+    if (!file.exists(file)) {
+      stop("country_cell.csv(.gz) not found. It holds the country of each grid cell, ",
+           "built from LUH3's static ccode field by scripts/luh_country_mask.py ",
+           "in the graft repository.")
+    }
+    cells <- utils::read.csv(file)
+    stopifnot(c("x", "y", "country") %in% colnames(cells))
+    return(list(x = cells[, c("x", "y", "country")],
+                class = "data.frame",
+                description = "IAMC country per grid cell"))
   } else {
-    stop("Unexpected subtype, only data and regionMapping are accepted")
+    stop("Unexpected subtype, only data, regionMapping and countryCell are accepted")
   }
 }

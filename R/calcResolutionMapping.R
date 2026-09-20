@@ -44,20 +44,25 @@ calcResolutionMapping <- function(input, target) {
 
     mapping <- merge(magpie, mapping, by = "country")
   } else if (input == "iamc" || startsWith(input, "iamc:")) {
-    # same country-based route as coffee: the IAMC region mapping says which
-    # countries each region covers, magpie supplies country per grid cell
-    mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
+    # Country per grid cell comes from LUH3's own static ccode field rather
+    # than a MAgPIE clustermap, so an IAMC release can be downscaled from
+    # public data alone. The region mapping then says which region each
+    # country belongs to for this model.
+    mapping <- readSource("IAMC", subtype = "countryCell", convert = FALSE)
+    regionMapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
 
-    magpie <- calcOutput("ResolutionMapping", input = "magpie", target = target, aggregate = FALSE)
-    magpie <- magpie[, setdiff(colnames(magpie), c("region", "lowRes"))]
-
-    unmapped <- setdiff(unique(magpie$country), unique(mapping$country))
+    unmapped <- setdiff(unique(mapping$country), unique(regionMapping$country))
     if (length(unmapped) > 0) {
-      toolStatusMessage("warn", paste0(length(unmapped), " countries are not in the IAMC region mapping, ",
-                                       "their cells are dropped: ", paste(unmapped, collapse = ", ")))
+      toolStatusMessage("warn", paste0(length(unmapped), " countries are not in the region ",
+                                       "mapping, their cells are dropped: ",
+                                       paste(sort(unmapped), collapse = ", ")))
     }
+    mapping <- merge(mapping, regionMapping, by = "country")
 
-    mapping <- merge(magpie, mapping, by = "country")
+    mapping$cellOriginal <- paste0(sub("\\.", "p", mapping$x), ".", sub("\\.", "p", mapping$y))
+    mapping$global <- "GLO"
+
+    mapping <- toolResolutionMapping(mapping, targetGrid)
   } else {
     stop("Unsupported input type \"", input, "\"")
   }
