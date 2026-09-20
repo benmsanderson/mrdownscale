@@ -19,6 +19,8 @@ toolLandCategoriesMapping <- function(input, target) {
       out <- toolGetMapping("referenceMappings/witch.csv", where = "mrdownscale")
     } else if (x == "coffee") {
       out <- toolGetMapping("referenceMappings/coffee.csv", where = "mrdownscale")
+    } else if (x == "iamc" || startsWith(x, "iamc:")) {
+      out <- toolGetMapping("referenceMappings/iamc.csv", where = "mrdownscale")
     } else if (x == "landuseinit") {
       out <- toolGetMapping("referenceMappings/landuseinit.csv", where = "mrdownscale")
     } else if (x == "landuseinitchina") {

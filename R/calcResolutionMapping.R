@@ -43,6 +43,21 @@ calcResolutionMapping <- function(input, target) {
     magpie <- magpie[, setdiff(colnames(magpie), c("region", "lowRes"))]
 
     mapping <- merge(magpie, mapping, by = "country")
+  } else if (input == "iamc" || startsWith(input, "iamc:")) {
+    # same country-based route as coffee: the IAMC region mapping says which
+    # countries each region covers, magpie supplies country per grid cell
+    mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
+
+    magpie <- calcOutput("ResolutionMapping", input = "magpie", target = target, aggregate = FALSE)
+    magpie <- magpie[, setdiff(colnames(magpie), c("region", "lowRes"))]
+
+    unmapped <- setdiff(unique(magpie$country), unique(mapping$country))
+    if (length(unmapped) > 0) {
+      toolStatusMessage("warn", paste0(length(unmapped), " countries are not in the IAMC region mapping, ",
+                                       "their cells are dropped: ", paste(unmapped, collapse = ", ")))
+    }
+
+    mapping <- merge(magpie, mapping, by = "country")
   } else {
     stop("Unsupported input type \"", input, "\"")
   }

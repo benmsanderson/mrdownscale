@@ -18,7 +18,14 @@
 #' primf, primn, secdn, pastr, c4per, pltns, secdf, c3ann_irrigated, c3ann_rainfed
 #' These are given as shares. A "rest" category is added so shares sum up to 1.
 #'
-#' @param input name of an input dataset, options: "magpie", "witch"
+#' input = "iamc": an IAMC-format release such as ScenarioMIP, mapped to the
+#' land tree IAMC reports: primary, secondary and planted forest, pasture,
+#' built-up area, energy crops and other cropland, with other natural land
+#' taking whatever Land Cover does not otherwise account for. Select one
+#' scenario of a multi-scenario release with input = "iamc:<scenario>".
+#'
+#' @param input name of an input dataset, options: "magpie", "witch", "coffee",
+#' "iamc", "iamc:<scenario>"
 #' @return land input data
 #' @author Jan Philipp Dietrich, Pascal Sauer
 calcLandInput <- function(input) { # before adding args, consider: many functions @inheritParams from this function
@@ -167,6 +174,60 @@ calcLandInput <- function(input) { # before adding args, consider: many function
     stopifnot(rest >= 0)
     out <- mbind(out, rest)
 
+    out <- out[, , unique(refmap$data)]
+
+    expectedCategories <- unique(refmap$data)
+    primf <- "Land_Cover_Forest_Primary"
+  } else if (input == "iamc" || startsWith(input, "iamc:")) {
+    x <- readSource("IAMC")
+
+    # an IAMC release may hold several scenarios; input = "iamc:<scenario>"
+    # picks one, e.g. input = "iamc:Very Low - SSP1 (Marker)"
+    if (startsWith(input, "iamc:")) {
+      scenario <- sub("^iamc:", "", input)
+      if (!scenario %in% x$Scenario) {
+        stop("Scenario \"", scenario, "\" not found, available: \"",
+             paste(unique(x$Scenario), collapse = "\", \""), "\"")
+      }
+      x <- x[x$Scenario == scenario, ]
+    }
+    if (length(unique(x$Scenario)) != 1 || length(unique(x$Model)) != 1) {
+      stop("Expected exactly one model and scenario, found \"",
+           paste(unique(paste(x$Model, x$Scenario)), collapse = "\", \""),
+           "\"; select one with input = \"iamc:<scenario>\"")
+    }
+    landVariables <- c("Land_Cover", "Land_Cover_Cropland", "Land_Cover_Pasture",
+                       "Land_Cover_Forest", "Land_Cover_Forest_Primary",
+                       "Land_Cover_Forest_Secondary", "Land_Cover_Forest_Planted",
+                       "Land_Cover_Other_Natural", "Land_Cover_Built_Up_Area",
+                       "Land_Cover_Cropland_Energy_Crops")
+    x <- x[x$Variable %in% landVariables, ]
+    stopifnot(x$Unit == "million ha")
+
+    # a release may or may not carry World; where it does, it is a free check
+    # that the regions account for the global total, which is not a given
+    if ("World" %in% x$Region) {
+      regionSum <- stats::aggregate(Value ~ Variable + Year, data = x[x$Region != "World", ], FUN = sum)
+      world <- x[x$Region == "World", c("Variable", "Year", "Value")]
+      both <- merge(regionSum, world, by = c("Variable", "Year"), suffixes = c("Regions", "World"))
+      offBy <- abs(both$ValueRegions - both$ValueWorld) / pmax(both$ValueWorld, 1)
+      if (any(offBy > 0.01)) {
+        worst <- both[which.max(offBy), ]
+        toolStatusMessage("warn", paste0("regions do not sum to World, worst ", worst$Variable, " in ",
+                                         worst$Year, ": ", round(worst$ValueRegions, 1), " vs ",
+                                         round(worst$ValueWorld, 1), " Mha"))
+      }
+      x <- x[x$Region != "World", ]
+    }
+
+    out <- toolIAMCLandCategories(x)
+
+    # artificial region numbers/ids as these are expected later
+    mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
+    out <- toolAggregate(out, unique(mapping[, c("region", "lowRes")]))
+    names(dimnames(out)) <- c("region.id", "year", "data")
+
+    refmap <- toolGetMapping("referenceMappings/iamc.csv", where = "mrdownscale")
     out <- out[, , unique(refmap$data)]
 
     expectedCategories <- unique(refmap$data)

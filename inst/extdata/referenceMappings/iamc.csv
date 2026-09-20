@@ -1,0 +1,352 @@
+reference;data
+primf;Land_Cover_Forest_Primary
+secdf;Land_Cover_Forest_Secondary
+forestry_ndc;Land_Cover_Forest_Secondary
+forestry_aff_secdf;Land_Cover_Forest_Secondary
+forestry_aff_pltns;Land_Cover_Forest_Planted
+forestry_plant;Land_Cover_Forest_Planted
+primn;Land_Cover_Other_Natural
+secdn;Land_Cover_Other_Natural
+pastr;Land_Cover_Pasture
+range;Land_Cover_Pasture
+urban;Land_Cover_Built_Up_Area
+c3per_irrigated_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c3per_rainfed_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c4per_irrigated_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c4per_rainfed_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c3ann_irrigated_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c3ann_rainfed_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c4ann_irrigated_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c4ann_rainfed_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c3nfx_irrigated_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+c3nfx_rainfed_biofuel_1st_gen;Land_Cover_Cropland_Energy_Crops
+betr, irrigated;Land_Cover_Cropland_Energy_Crops
+betr, rainfed;Land_Cover_Cropland_Energy_Crops
+begr, irrigated;Land_Cover_Cropland_Energy_Crops
+begr, rainfed;Land_Cover_Cropland_Energy_Crops
+alfalfa, irrigated;Land_Cover_Cropland_Other
+alfalfa, rainfed;Land_Cover_Cropland_Other
+Almonds, with shell, irrigated;Land_Cover_Cropland_Other
+Almonds, with shell, rainfed;Land_Cover_Cropland_Other
+Anise, badian, fennel, coriander, irrigated;Land_Cover_Cropland_Other
+Anise, badian, fennel, coriander, rainfed;Land_Cover_Cropland_Other
+Apples, irrigated;Land_Cover_Cropland_Other
+Apples, rainfed;Land_Cover_Cropland_Other
+Apricots, irrigated;Land_Cover_Cropland_Other
+Apricots, rainfed;Land_Cover_Cropland_Other
+Areca nuts, irrigated;Land_Cover_Cropland_Other
+Areca nuts, rainfed;Land_Cover_Cropland_Other
+Artichokes, irrigated;Land_Cover_Cropland_Other
+Artichokes, rainfed;Land_Cover_Cropland_Other
+Asparagus, irrigated;Land_Cover_Cropland_Other
+Asparagus, rainfed;Land_Cover_Cropland_Other
+Avocados, irrigated;Land_Cover_Cropland_Other
+Avocados, rainfed;Land_Cover_Cropland_Other
+Bambara beans, irrigated;Land_Cover_Cropland_Other
+Bambara beans, rainfed;Land_Cover_Cropland_Other
+Bananas, irrigated;Land_Cover_Cropland_Other
+Bananas, rainfed;Land_Cover_Cropland_Other
+Barley, irrigated;Land_Cover_Cropland_Other
+Barley, rainfed;Land_Cover_Cropland_Other
+Beans, dry, irrigated;Land_Cover_Cropland_Other
+Beans, dry, rainfed;Land_Cover_Cropland_Other
+Beans, green, irrigated;Land_Cover_Cropland_Other
+Beans, green, rainfed;Land_Cover_Cropland_Other
+beetfor, irrigated;Land_Cover_Cropland_Other
+beetfor, rainfed;Land_Cover_Cropland_Other
+Berries nes, irrigated;Land_Cover_Cropland_Other
+Berries nes, rainfed;Land_Cover_Cropland_Other
+Blueberries, irrigated;Land_Cover_Cropland_Other
+Blueberries, rainfed;Land_Cover_Cropland_Other
+Brazil nuts, with shell, irrigated;Land_Cover_Cropland_Other
+Brazil nuts, with shell, rainfed;Land_Cover_Cropland_Other
+Broad beans, horse beans, dry, irrigated;Land_Cover_Cropland_Other
+Broad beans, horse beans, dry, rainfed;Land_Cover_Cropland_Other
+Buckwheat, irrigated;Land_Cover_Cropland_Other
+Buckwheat, rainfed;Land_Cover_Cropland_Other
+cabbagefor, irrigated;Land_Cover_Cropland_Other
+cabbagefor, rainfed;Land_Cover_Cropland_Other
+Cabbages and other brassicas, irrigated;Land_Cover_Cropland_Other
+Cabbages and other brassicas, rainfed;Land_Cover_Cropland_Other
+Canary seed, irrigated;Land_Cover_Cropland_Other
+Canary seed, rainfed;Land_Cover_Cropland_Other
+Carobs, irrigated;Land_Cover_Cropland_Other
+Carobs, rainfed;Land_Cover_Cropland_Other
+carrotfor, irrigated;Land_Cover_Cropland_Other
+carrotfor, rainfed;Land_Cover_Cropland_Other
+Carrots and turnips, irrigated;Land_Cover_Cropland_Other
+Carrots and turnips, rainfed;Land_Cover_Cropland_Other
+Cashew nuts, with shell, irrigated;Land_Cover_Cropland_Other
+Cashew nuts, with shell, rainfed;Land_Cover_Cropland_Other
+Cashewapple, irrigated;Land_Cover_Cropland_Other
+Cashewapple, rainfed;Land_Cover_Cropland_Other
+Cassava, irrigated;Land_Cover_Cropland_Other
+Cassava, rainfed;Land_Cover_Cropland_Other
+Castor oil seed, irrigated;Land_Cover_Cropland_Other
+Castor oil seed, rainfed;Land_Cover_Cropland_Other
+Cauliflowers and broccoli, irrigated;Land_Cover_Cropland_Other
+Cauliflowers and broccoli, rainfed;Land_Cover_Cropland_Other
+Cereals nes, irrigated;Land_Cover_Cropland_Other
+Cereals nes, rainfed;Land_Cover_Cropland_Other
+Cherries, irrigated;Land_Cover_Cropland_Other
+Cherries, rainfed;Land_Cover_Cropland_Other
+Cherries, sour, irrigated;Land_Cover_Cropland_Other
+Cherries, sour, rainfed;Land_Cover_Cropland_Other
+Chestnut, irrigated;Land_Cover_Cropland_Other
+Chestnut, rainfed;Land_Cover_Cropland_Other
+Chick peas, irrigated;Land_Cover_Cropland_Other
+Chick peas, rainfed;Land_Cover_Cropland_Other
+Chicory roots, irrigated;Land_Cover_Cropland_Other
+Chicory roots, rainfed;Land_Cover_Cropland_Other
+Chillies and peppers, dry, irrigated;Land_Cover_Cropland_Other
+Chillies and peppers, dry, rainfed;Land_Cover_Cropland_Other
+Chillies and peppers, green, irrigated;Land_Cover_Cropland_Other
+Chillies and peppers, green, rainfed;Land_Cover_Cropland_Other
+Cinnamon (cannella), irrigated;Land_Cover_Cropland_Other
+Cinnamon (cannella), rainfed;Land_Cover_Cropland_Other
+clover, irrigated;Land_Cover_Cropland_Other
+clover, rainfed;Land_Cover_Cropland_Other
+Cloves, irrigated;Land_Cover_Cropland_Other
+Cloves, rainfed;Land_Cover_Cropland_Other
+Cocoa, beans, irrigated;Land_Cover_Cropland_Other
+Cocoa, beans, rainfed;Land_Cover_Cropland_Other
+Coconuts, irrigated;Land_Cover_Cropland_Other
+Coconuts, rainfed;Land_Cover_Cropland_Other
+Coffee, green, irrigated;Land_Cover_Cropland_Other
+Coffee, green, rainfed;Land_Cover_Cropland_Other
+Cow peas, dry, irrigated;Land_Cover_Cropland_Other
+Cow peas, dry, rainfed;Land_Cover_Cropland_Other
+Cranberries, irrigated;Land_Cover_Cropland_Other
+Cranberries, rainfed;Land_Cover_Cropland_Other
+Cucumbers and gherkins, irrigated;Land_Cover_Cropland_Other
+Cucumbers and gherkins, rainfed;Land_Cover_Cropland_Other
+Currants, irrigated;Land_Cover_Cropland_Other
+Currants, rainfed;Land_Cover_Cropland_Other
+Dates, irrigated;Land_Cover_Cropland_Other
+Dates, rainfed;Land_Cover_Cropland_Other
+Eggplants (aubergines), irrigated;Land_Cover_Cropland_Other
+Eggplants (aubergines), rainfed;Land_Cover_Cropland_Other
+Figs, irrigated;Land_Cover_Cropland_Other
+Figs, rainfed;Land_Cover_Cropland_Other
+Fonio, irrigated;Land_Cover_Cropland_Other
+Fonio, rainfed;Land_Cover_Cropland_Other
+fornes, irrigated;Land_Cover_Cropland_Other
+fornes, rainfed;Land_Cover_Cropland_Other
+Fruit, citrus nes, irrigated;Land_Cover_Cropland_Other
+Fruit, citrus nes, rainfed;Land_Cover_Cropland_Other
+Fruit, fresh nes, irrigated;Land_Cover_Cropland_Other
+Fruit, fresh nes, rainfed;Land_Cover_Cropland_Other
+Fruit, pome nes, irrigated;Land_Cover_Cropland_Other
+Fruit, pome nes, rainfed;Land_Cover_Cropland_Other
+Fruit, stone nes, irrigated;Land_Cover_Cropland_Other
+Fruit, stone nes, rainfed;Land_Cover_Cropland_Other
+Fruit, tropical fresh nes, irrigated;Land_Cover_Cropland_Other
+Fruit, tropical fresh nes, rainfed;Land_Cover_Cropland_Other
+Garlic, irrigated;Land_Cover_Cropland_Other
+Garlic, rainfed;Land_Cover_Cropland_Other
+Ginger, irrigated;Land_Cover_Cropland_Other
+Ginger, rainfed;Land_Cover_Cropland_Other
+Gooseberries, irrigated;Land_Cover_Cropland_Other
+Gooseberries, rainfed;Land_Cover_Cropland_Other
+Grain, mixed, irrigated;Land_Cover_Cropland_Other
+Grain, mixed, rainfed;Land_Cover_Cropland_Other
+Grapefruit (incl pomelos), irrigated;Land_Cover_Cropland_Other
+Grapefruit (incl pomelos), rainfed;Land_Cover_Cropland_Other
+Grapes, irrigated;Land_Cover_Cropland_Other
+Grapes, rainfed;Land_Cover_Cropland_Other
+grassnes, irrigated;Land_Cover_Cropland_Other
+grassnes, rainfed;Land_Cover_Cropland_Other
+Groundnuts, with shell, irrigated;Land_Cover_Cropland_Other
+Groundnuts, with shell, rainfed;Land_Cover_Cropland_Other
+Hazelnuts, with shell, irrigated;Land_Cover_Cropland_Other
+Hazelnuts, with shell, rainfed;Land_Cover_Cropland_Other
+Hempseed, irrigated;Land_Cover_Cropland_Other
+Hempseed, rainfed;Land_Cover_Cropland_Other
+Hops, irrigated;Land_Cover_Cropland_Other
+Hops, rainfed;Land_Cover_Cropland_Other
+Jojoba seed, irrigated;Land_Cover_Cropland_Other
+Jojoba seed, rainfed;Land_Cover_Cropland_Other
+Kapok fruit, irrigated;Land_Cover_Cropland_Other
+Kapok fruit, rainfed;Land_Cover_Cropland_Other
+Karite nuts (sheanuts), irrigated;Land_Cover_Cropland_Other
+Karite nuts (sheanuts), rainfed;Land_Cover_Cropland_Other
+Kiwi fruit, irrigated;Land_Cover_Cropland_Other
+Kiwi fruit, rainfed;Land_Cover_Cropland_Other
+Kola nuts, irrigated;Land_Cover_Cropland_Other
+Kola nuts, rainfed;Land_Cover_Cropland_Other
+Leeks, other alliaceous vegetables, irrigated;Land_Cover_Cropland_Other
+Leeks, other alliaceous vegetables, rainfed;Land_Cover_Cropland_Other
+legumenes, irrigated;Land_Cover_Cropland_Other
+legumenes, rainfed;Land_Cover_Cropland_Other
+Lemons and limes, irrigated;Land_Cover_Cropland_Other
+Lemons and limes, rainfed;Land_Cover_Cropland_Other
+Lentils, irrigated;Land_Cover_Cropland_Other
+Lentils, rainfed;Land_Cover_Cropland_Other
+Lettuce and chicory, irrigated;Land_Cover_Cropland_Other
+Lettuce and chicory, rainfed;Land_Cover_Cropland_Other
+Linseed, irrigated;Land_Cover_Cropland_Other
+Linseed, rainfed;Land_Cover_Cropland_Other
+Lupins, irrigated;Land_Cover_Cropland_Other
+Lupins, rainfed;Land_Cover_Cropland_Other
+Maize, irrigated;Land_Cover_Cropland_Other
+Maize, rainfed;Land_Cover_Cropland_Other
+Maize, green, irrigated;Land_Cover_Cropland_Other
+Maize, green, rainfed;Land_Cover_Cropland_Other
+maizefor, irrigated;Land_Cover_Cropland_Other
+maizefor, rainfed;Land_Cover_Cropland_Other
+Mangoes, mangosteens, guavas, irrigated;Land_Cover_Cropland_Other
+Mangoes, mangosteens, guavas, rainfed;Land_Cover_Cropland_Other
+Mate, irrigated;Land_Cover_Cropland_Other
+Mate, rainfed;Land_Cover_Cropland_Other
+Melons, other (incl cantaloupes), irrigated;Land_Cover_Cropland_Other
+Melons, other (incl cantaloupes), rainfed;Land_Cover_Cropland_Other
+Melonseed, irrigated;Land_Cover_Cropland_Other
+Melonseed, rainfed;Land_Cover_Cropland_Other
+Millet, irrigated;Land_Cover_Cropland_Other
+Millet, rainfed;Land_Cover_Cropland_Other
+mixedgrass, irrigated;Land_Cover_Cropland_Other
+mixedgrass, rainfed;Land_Cover_Cropland_Other
+Mushrooms and truffles, irrigated;Land_Cover_Cropland_Other
+Mushrooms and truffles, rainfed;Land_Cover_Cropland_Other
+Mustard seed, irrigated;Land_Cover_Cropland_Other
+Mustard seed, rainfed;Land_Cover_Cropland_Other
+Nutmeg, mace and cardamoms, irrigated;Land_Cover_Cropland_Other
+Nutmeg, mace and cardamoms, rainfed;Land_Cover_Cropland_Other
+Nuts nes, irrigated;Land_Cover_Cropland_Other
+Nuts nes, rainfed;Land_Cover_Cropland_Other
+Oats, irrigated;Land_Cover_Cropland_Other
+Oats, rainfed;Land_Cover_Cropland_Other
+Oil palm fruit, irrigated;Land_Cover_Cropland_Other
+Oil palm fruit, rainfed;Land_Cover_Cropland_Other
+oilseedfor, irrigated;Land_Cover_Cropland_Other
+oilseedfor, rainfed;Land_Cover_Cropland_Other
+Oilseeds nes, irrigated;Land_Cover_Cropland_Other
+Oilseeds nes, rainfed;Land_Cover_Cropland_Other
+Okra, irrigated;Land_Cover_Cropland_Other
+Okra, rainfed;Land_Cover_Cropland_Other
+Olives, irrigated;Land_Cover_Cropland_Other
+Olives, rainfed;Land_Cover_Cropland_Other
+Onions, dry, irrigated;Land_Cover_Cropland_Other
+Onions, dry, rainfed;Land_Cover_Cropland_Other
+Onions, shallots, green, irrigated;Land_Cover_Cropland_Other
+Onions, shallots, green, rainfed;Land_Cover_Cropland_Other
+Oranges, irrigated;Land_Cover_Cropland_Other
+Oranges, rainfed;Land_Cover_Cropland_Other
+Papayas, irrigated;Land_Cover_Cropland_Other
+Papayas, rainfed;Land_Cover_Cropland_Other
+Peaches and nectarines, irrigated;Land_Cover_Cropland_Other
+Peaches and nectarines, rainfed;Land_Cover_Cropland_Other
+Pears, irrigated;Land_Cover_Cropland_Other
+Pears, rainfed;Land_Cover_Cropland_Other
+Peas, dry, irrigated;Land_Cover_Cropland_Other
+Peas, dry, rainfed;Land_Cover_Cropland_Other
+Peas, green, irrigated;Land_Cover_Cropland_Other
+Peas, green, rainfed;Land_Cover_Cropland_Other
+Pepper (piper spp), irrigated;Land_Cover_Cropland_Other
+Pepper (piper spp), rainfed;Land_Cover_Cropland_Other
+Peppermint, irrigated;Land_Cover_Cropland_Other
+Peppermint, rainfed;Land_Cover_Cropland_Other
+Persimmons, irrigated;Land_Cover_Cropland_Other
+Persimmons, rainfed;Land_Cover_Cropland_Other
+Pigeon peas, irrigated;Land_Cover_Cropland_Other
+Pigeon peas, rainfed;Land_Cover_Cropland_Other
+Pineapples, irrigated;Land_Cover_Cropland_Other
+Pineapples, rainfed;Land_Cover_Cropland_Other
+Pistachios, irrigated;Land_Cover_Cropland_Other
+Pistachios, rainfed;Land_Cover_Cropland_Other
+Plantains and others, irrigated;Land_Cover_Cropland_Other
+Plantains and others, rainfed;Land_Cover_Cropland_Other
+Plums and sloes, irrigated;Land_Cover_Cropland_Other
+Plums and sloes, rainfed;Land_Cover_Cropland_Other
+popcorn, irrigated;Land_Cover_Cropland_Other
+popcorn, rainfed;Land_Cover_Cropland_Other
+Poppy seed, irrigated;Land_Cover_Cropland_Other
+Poppy seed, rainfed;Land_Cover_Cropland_Other
+Potatoes, irrigated;Land_Cover_Cropland_Other
+Potatoes, rainfed;Land_Cover_Cropland_Other
+Pulses nes, irrigated;Land_Cover_Cropland_Other
+Pulses nes, rainfed;Land_Cover_Cropland_Other
+Pumpkins, squash and gourds, irrigated;Land_Cover_Cropland_Other
+Pumpkins, squash and gourds, rainfed;Land_Cover_Cropland_Other
+Quinces, irrigated;Land_Cover_Cropland_Other
+Quinces, rainfed;Land_Cover_Cropland_Other
+Quinoa, irrigated;Land_Cover_Cropland_Other
+Quinoa, rainfed;Land_Cover_Cropland_Other
+Rapeseed, irrigated;Land_Cover_Cropland_Other
+Rapeseed, rainfed;Land_Cover_Cropland_Other
+Raspberries, irrigated;Land_Cover_Cropland_Other
+Raspberries, rainfed;Land_Cover_Cropland_Other
+Rice, paddy, irrigated;Land_Cover_Cropland_Other
+Rice, paddy, rainfed;Land_Cover_Cropland_Other
+Roots and tubers nes, irrigated;Land_Cover_Cropland_Other
+Roots and tubers nes, rainfed;Land_Cover_Cropland_Other
+Rye, irrigated;Land_Cover_Cropland_Other
+Rye, rainfed;Land_Cover_Cropland_Other
+ryefor, irrigated;Land_Cover_Cropland_Other
+ryefor, rainfed;Land_Cover_Cropland_Other
+Safflower seed, irrigated;Land_Cover_Cropland_Other
+Safflower seed, rainfed;Land_Cover_Cropland_Other
+Seed cotton, irrigated;Land_Cover_Cropland_Other
+Seed cotton, rainfed;Land_Cover_Cropland_Other
+Sesame seed, irrigated;Land_Cover_Cropland_Other
+Sesame seed, rainfed;Land_Cover_Cropland_Other
+Sorghum, irrigated;Land_Cover_Cropland_Other
+Sorghum, rainfed;Land_Cover_Cropland_Other
+sorghumfor, irrigated;Land_Cover_Cropland_Other
+sorghumfor, rainfed;Land_Cover_Cropland_Other
+Soybeans, irrigated;Land_Cover_Cropland_Other
+Soybeans, rainfed;Land_Cover_Cropland_Other
+Spices nes, irrigated;Land_Cover_Cropland_Other
+Spices nes, rainfed;Land_Cover_Cropland_Other
+Spinach, irrigated;Land_Cover_Cropland_Other
+Spinach, rainfed;Land_Cover_Cropland_Other
+Strawberries, irrigated;Land_Cover_Cropland_Other
+Strawberries, rainfed;Land_Cover_Cropland_Other
+String beans, irrigated;Land_Cover_Cropland_Other
+String beans, rainfed;Land_Cover_Cropland_Other
+Sugar beet, irrigated;Land_Cover_Cropland_Other
+Sugar beet, rainfed;Land_Cover_Cropland_Other
+Sugar cane, irrigated;Land_Cover_Cropland_Other
+Sugar cane, rainfed;Land_Cover_Cropland_Other
+Sunflower seed, irrigated;Land_Cover_Cropland_Other
+Sunflower seed, rainfed;Land_Cover_Cropland_Other
+swedefor, irrigated;Land_Cover_Cropland_Other
+swedefor, rainfed;Land_Cover_Cropland_Other
+Sweet potatoes, irrigated;Land_Cover_Cropland_Other
+Sweet potatoes, rainfed;Land_Cover_Cropland_Other
+Tallowtree seed, irrigated;Land_Cover_Cropland_Other
+Tallowtree seed, rainfed;Land_Cover_Cropland_Other
+Tangerines, mandarins, clementines, satsumas, irrigated;Land_Cover_Cropland_Other
+Tangerines, mandarins, clementines, satsumas, rainfed;Land_Cover_Cropland_Other
+Taro (cocoyam), irrigated;Land_Cover_Cropland_Other
+Taro (cocoyam), rainfed;Land_Cover_Cropland_Other
+Tea, irrigated;Land_Cover_Cropland_Other
+Tea, rainfed;Land_Cover_Cropland_Other
+Tomatoes, irrigated;Land_Cover_Cropland_Other
+Tomatoes, rainfed;Land_Cover_Cropland_Other
+Triticale, irrigated;Land_Cover_Cropland_Other
+Triticale, rainfed;Land_Cover_Cropland_Other
+Tung nuts, irrigated;Land_Cover_Cropland_Other
+Tung nuts, rainfed;Land_Cover_Cropland_Other
+turnipfor, irrigated;Land_Cover_Cropland_Other
+turnipfor, rainfed;Land_Cover_Cropland_Other
+Vanilla, irrigated;Land_Cover_Cropland_Other
+Vanilla, rainfed;Land_Cover_Cropland_Other
+Vegetables, fresh nes, irrigated;Land_Cover_Cropland_Other
+Vegetables, fresh nes, rainfed;Land_Cover_Cropland_Other
+Vegetables, leguminous nes, irrigated;Land_Cover_Cropland_Other
+Vegetables, leguminous nes, rainfed;Land_Cover_Cropland_Other
+vegfor, irrigated;Land_Cover_Cropland_Other
+vegfor, rainfed;Land_Cover_Cropland_Other
+Vetches, irrigated;Land_Cover_Cropland_Other
+Vetches, rainfed;Land_Cover_Cropland_Other
+Walnuts, with shell, irrigated;Land_Cover_Cropland_Other
+Walnuts, with shell, rainfed;Land_Cover_Cropland_Other
+Watermelons, irrigated;Land_Cover_Cropland_Other
+Watermelons, rainfed;Land_Cover_Cropland_Other
+Wheat, irrigated;Land_Cover_Cropland_Other
+Wheat, rainfed;Land_Cover_Cropland_Other
+Yams, irrigated;Land_Cover_Cropland_Other
+Yams, rainfed;Land_Cover_Cropland_Other
+Yautia (cocoyam), irrigated;Land_Cover_Cropland_Other
+Yautia (cocoyam), rainfed;Land_Cover_Cropland_Other
