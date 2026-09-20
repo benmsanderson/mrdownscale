@@ -202,7 +202,7 @@ calcLandInput <- function(input) { # before adding args, consider: many function
                        "Land_Cover_Other_Natural", "Land_Cover_Built_Up_Area",
                        "Land_Cover_Cropland_Energy_Crops")
     x <- x[x$Variable %in% landVariables, ]
-    stopifnot(x$Unit == "million ha")
+    stopifnot(x$Unit %in% c("million ha", "Mha"))  # both spellings are in use
 
     # a release may or may not carry World; where it does, it is a free check
     # that the regions account for the global total, which is not a given
