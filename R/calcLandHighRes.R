@@ -49,6 +49,16 @@ calcLandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, har
 
   out <- mbind(xTarget[, histYears, ], out)
 
+  # IAMC input carries the reporting model's forest dynamics, which ignore
+  # where LUH's potential vegetation allows forest; apply LUH's rule for
+  # secondary land so gains land where LUH would put them
+  secondaryLandRule <- startsWith(input, "iamc") && target == "luh3"
+  if (secondaryLandRule) {
+    potentialForest <- readSource("LUH3", subtype = "potentialForest", convert = FALSE)
+    potentialForest <- collapseDim(as.magpie(potentialForest), 3)
+    out <- toolSecondaryLandRule(out, potentialForest, baseYear = max(histYears))
+  }
+
   out <- toolReplaceExpansion(out, "primf", "secdf", warnThreshold = 100)
   out <- toolReplaceExpansion(out, "primn", "secdn", warnThreshold = 100)
 
@@ -68,8 +78,20 @@ calcLandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, har
   globalSumOut <- dimSums(out, dim = 1)
   toolExpectLessDiff(dimSums(globalSumIn, 3), dimSums(globalSumOut, 3), 10^-5,
                      "Total global land area remains unchanged")
-  toolExpectLessDiff(globalSumIn, globalSumOut, 10^-5,
-                     "Global area of each land type remains unchanged")
+  if (secondaryLandRule) {
+    # the rule moves area between secdf, pltns and secdn by design, so those
+    # are checked together; every other land type must be unchanged
+    secondary <- c("secdf", "pltns", "secdn")
+    regroup <- function(z) {
+      mbind(z[, , secondary, invert = TRUE],
+            magclass::setNames(dimSums(z[, , secondary], dim = 3), "secondary"))
+    }
+    toolExpectLessDiff(regroup(globalSumIn), regroup(globalSumOut), 10^-5,
+                       "Global area of each land type remains unchanged (secdf, pltns and secdn together)")
+  } else {
+    toolExpectLessDiff(globalSumIn, globalSumOut, 10^-5,
+                       "Global area of each land type remains unchanged")
+  }
   toolPrimExpansionCheck(out)
 
   return(list(x = out,
