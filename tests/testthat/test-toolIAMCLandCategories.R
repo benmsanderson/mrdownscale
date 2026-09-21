@@ -41,7 +41,7 @@ test_that("area Land Cover does not account for goes to other natural land", {
   withOther$Value[withOther$Variable == "Land_Cover_Other_Natural"] <- 5
   withOther$Value[withOther$Variable == "Land_Cover_Pasture"] <- 20
 
-  x <- toolIAMCLandCategories(withOther)
+  expect_warning(x <- toolIAMCLandCategories(withOther), "miss the Land_Cover total")
 
   expect_equal(as.vector(x[, 2020, "Land_Cover_Other_Natural"]), c(15, 15))
   expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
@@ -74,7 +74,9 @@ test_that("categories that are not reported are filled with zeros", {
   sparse <- clean[!clean$Variable %in% c("Land_Cover_Built_Up_Area",
                                          "Land_Cover_Cropland_Energy_Crops"), ]
 
-  x <- toolIAMCLandCategories(sparse)
+  # the unreported built-up area is not lost: it lands in other natural land,
+  # and the shortfall against Land Cover is reported
+  expect_warning(x <- toolIAMCLandCategories(sparse), "miss the Land_Cover total")
 
   expect_equal(as.vector(x[, 2020, "Land_Cover_Built_Up_Area"]), c(0, 0))
   expect_equal(as.vector(x[, 2020, "Land_Cover_Cropland_Energy_Crops"]), c(0, 0))
