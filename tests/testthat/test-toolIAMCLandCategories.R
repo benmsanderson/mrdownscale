@@ -100,3 +100,16 @@ test_that("only years reporting every variable are kept", {
 
   expect_identical(getYears(x, as.integer = TRUE), c(2020L, 2050L))
 })
+
+test_that("an increase in primary forest is moved into secondary forest", {
+  # primary forest ticks up by rounding between the two reported years
+  rounding <- clean
+  rounding$Value[rounding$Variable == "Land_Cover_Forest_Primary" & rounding$Year == 2050] <- 10.05
+  rounding$Value[rounding$Variable == "Land_Cover_Forest_Secondary" & rounding$Year == 2050] <- 24.95
+
+  x <- toolIAMCLandCategories(rounding)
+
+  expect_equal(as.vector(x[, 2050, "Land_Cover_Forest_Primary"]), c(10, 10))
+  expect_equal(as.vector(x[, 2050, "Land_Cover_Forest_Secondary"]), c(25, 25))
+  expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
+})

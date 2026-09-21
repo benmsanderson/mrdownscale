@@ -16,6 +16,8 @@
 #'   Land Cover does not otherwise account for is added to other natural
 #'   land, which recategorizes to primn/secdn. LUH has no barren category,
 #'   so that is where this area belongs.
+#'   \item Primary forest cannot expand, so any increase between reported
+#'   years, which is usually rounding, is moved into secondary forest.
 #'   \item Built-up area and energy crops are not reported by every model and
 #'   are filled with zeros when missing. That area is not lost, it stays in
 #'   the Land Cover total and so ends up in other natural land.
@@ -75,6 +77,13 @@ toolIAMCLandCategories <- function(x) {
          round(max(offset), 1), " Mha. This model needs a prior for the forest split.")
   }
   out[, , forestParts] <- out[, , forestParts] * ifelse(partSum > 0, forest / partSum, 1)
+
+  # primary forest cannot expand by definition, but reported values drift up
+  # by rounding (0.085 Mha in one VL region-step); move any increase into
+  # secondary forest, which keeps the forest total. Above 1 Mha it is not
+  # rounding and still warns.
+  out <- toolReplaceExpansion(out, "Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary",
+                              warnThreshold = 1)
 
   cropland <- collapseDim(out[, , "Land_Cover_Cropland"], dim = 3)
   energyCrops <- collapseDim(out[, , "Land_Cover_Cropland_Energy_Crops"], dim = 3)
