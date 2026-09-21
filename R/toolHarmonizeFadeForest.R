@@ -20,12 +20,20 @@ toolHarmonizeFadeForest <- function(xInput, xTarget, harmonizationPeriod) {
 
   # linear extrapolation of primf, don't want to exceed this, also ensures some primf is always harvested
   primfTarget <- xTarget[, getYears(xTarget, TRUE) <= hp1, "primf"]
+  targetYears <- getYears(primfTarget, as.integer = TRUE)
   decline <- -primfTarget[, -1, ] + setYears(primfTarget[, -nyears(primfTarget), ],
                                              getYears(primfTarget[, -1, ]))
+  # per year, so that neither the target's nor the output's time step changes
+  # the rate: output years after hp1 are usually 5 or 10 years apart, and
+  # subtracting one year's decline per step made primf decline 5-10x too slowly
+  decline <- decline / diff(targetYears)
   primfMeanDecline <- magpply(decline, mean, DIM = 2)
   linearEx <- xTarget[, hp1, "primf"]
+  previousYear <- hp1
   for (year in years[years > hp1]) {
-    linearEx <- mbind(linearEx, setYears(linearEx[, nyears(linearEx), ] - primfMeanDecline, year))
+    linearEx <- mbind(linearEx, setYears(linearEx[, nyears(linearEx), ] - primfMeanDecline * (year - previousYear),
+                                         year))
+    previousYear <- year
   }
   linearEx[linearEx < 0] <- 0
 
