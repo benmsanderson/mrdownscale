@@ -30,6 +30,14 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
 
   xInput <- toolEqualizeArea(xInput, xTarget[, harmonizationPeriod[1], ])
 
+  # IAMC forest follows the reporting model's definition, not LUH's, and the
+  # harmonizers all converge on the input's forest total; shift the level onto
+  # the target's definition at the start of harmonization, keeping the
+  # input's forest changes. See toolForestCrosswalk.
+  if (startsWith(input, "iamc")) {
+    xInput <- toolForestCrosswalk(xInput, xTarget, year = harmonizationPeriod[1])
+  }
+
   harmonizer <- toolGetHarmonizer(harmonization)
   out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
 
