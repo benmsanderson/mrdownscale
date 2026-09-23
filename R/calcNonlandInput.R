@@ -83,6 +83,14 @@ calcNonlandInput <- function(input) { # before adding args, consider: many funct
                                        "LUH's fertilization rate is synthetic, so this overstates it"))
       wanted[["fertilizer.nitrogen"]] <- "Fertilizer_Use_Nitrogen"
     }
+    # a model may report no wood harvest at all - COFFEE reports none - and
+    # then the target's own harvest history is held instead
+    # (toolIAMCNonlandRecategorized)
+    harvest <- grep("^wood_harvest_demand", names(wanted), value = TRUE)
+    if (!any(wanted[harvest] %in% x$Variable)) {
+      toolStatusMessage("note", "no wood harvest is reported; the target's harvest history will be held")
+      wanted <- wanted[setdiff(names(wanted), harvest)]
+    }
     missingVariables <- setdiff(wanted, x$Variable)
     if (length(missingVariables) > 0) {
       stop("Missing required variables: \"", paste(missingVariables, collapse = "\", \""), "\"")

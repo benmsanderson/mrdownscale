@@ -65,19 +65,43 @@ toolIAMCNonlandRecategorized <- function(input, target) {
                                                 numeric(nrow(regions))))
   }
 
-  harvest <- toolIAMCWoodHarvest(demand = nonland[, , "wood_harvest_demand.roundwood"],
-                                 historicWeight = historicWeight,
-                                 historicArea = historicArea,
-                                 historicVolume = nonland[, calibrationYear, "wood_harvest_demand.roundwood"])
+  reportsHarvest <- "wood_harvest_demand" %in% getItems(nonland, dim = 3.1)
+  if (reportsHarvest) {
+    harvest <- toolIAMCWoodHarvest(demand = nonland[, , "wood_harvest_demand.roundwood"],
+                                   historicWeight = historicWeight,
+                                   historicArea = historicArea,
+                                   historicVolume = nonland[, calibrationYear, "wood_harvest_demand.roundwood"])
+    # roundwood and fuelwood shares, as the target names them
+    industrial <- collapseDim(nonland[, , "wood_harvest_demand.industrial"], dim = 3)
+    fuel <- collapseDim(nonland[, , "wood_harvest_demand.fuel"], dim = 3)
+    total <- pmax(industrial + fuel, .Machine$double.eps)
+    weightType <- mbind(magclass::setNames(industrial / total, "roundwood"),
+                        magclass::setNames(fuel / total, "fuelwood"))
+  } else {
+    # nothing reported about harvest: hold the target's history, so the
+    # scenario says nothing rather than saying zero
+    toolStatusMessage("note", paste0("no wood harvest reported; holding the target's ", min(window), "-",
+                                     max(window), " harvest for every year"))
+    hold <- function(x) {
+      out <- new.magpie(getItems(x, dim = 1), reported, getItems(x, dim = 3), fill = 0)
+      for (year in reported) out[, year, ] <- as.vector(x)
+      out
+    }
+    harvest <- list(weight = hold(historicWeight), area = hold(historicArea))
+    # the split between wood products and fuel comes from the target too, as
+    # the share of harvested carbon the management layer calls roundwood
+    management <- readSource("LUH3", subtype = "management", subset = calibrationYear, convert = FALSE)
+    roundwoodShare <- management[[grep("rndwd", names(management))]]
+    biohLayers <- transitions[[which(endsWith(names(transitions), "_bioh")
+                                     & historicYears == calibrationYear)]]
+    totalBioh <- sum(biohLayers)
+    share <- perRegion(roundwoodShare * totalBioh) / pmax(perRegion(totalBioh), .Machine$double.eps)
+    roundwood <- new.magpie(getItems(landMha, dim = 1), reported, "roundwood", fill = 0)
+    for (year in reported) roundwood[, year, ] <- share
+    weightType <- mbind(roundwood, magclass::setNames(1 - roundwood, "fuelwood"))
+  }
   bioh <- add_dimension(harvest$weight, dim = 3.1, add = "category", "bioh")
   harvestArea <- add_dimension(harvest$area, dim = 3.1, add = "category", "wood_harvest_area")
-
-  # roundwood and fuelwood shares, as the target names them
-  industrial <- collapseDim(nonland[, , "wood_harvest_demand.industrial"], dim = 3)
-  fuel <- collapseDim(nonland[, , "wood_harvest_demand.fuel"], dim = 3)
-  total <- pmax(industrial + fuel, .Machine$double.eps)
-  weightType <- mbind(magclass::setNames(industrial / total, "roundwood"),
-                      magclass::setNames(fuel / total, "fuelwood"))
   weightType <- add_dimension(weightType, dim = 3.1, add = "category", "harvest_weight_type")
 
   # fertilizer, split by each crop's share of that region's cropland
