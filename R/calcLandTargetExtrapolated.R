@@ -34,7 +34,9 @@ calcLandTargetExtrapolated <- function(input, target, harmonizationPeriod) {
                     harmonizationPeriod = hp, aggregate = FALSE)
 
   harvest <- NULL
-  if (input %in% c("magpie") && target %in% c("luh2mod", "luh3")) {
+  # iamc input carries wood harvest too, from the reported roundwood volume
+  # split across source forests (toolIAMCNonlandRecategorized)
+  if ((input %in% c("magpie") || startsWith(input, "iamc")) && target %in% c("luh2mod", "luh3")) {
     # ------- calculate wood harvest shares -------
     harvestHist <- calcOutput("NonlandTargetLowRes", input = input, target = target,
                               endOfHistory = hp[1], aggregate = FALSE)

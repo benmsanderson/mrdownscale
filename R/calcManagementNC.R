@@ -31,7 +31,7 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
   x <- x[, , intersect(landManagementVariables, getItems(x, 3))]
 
   if (input == "magpie") {
-    nonland <- calcOutput("NonlandReport", outputFormat = outputFormat,
+    nonland <- calcOutput("NonlandReport", outputFormat = outputFormat, input = input,
                           harmonizationPeriod = harmonizationPeriod,
                           yearsSubset = yearsSubset,
                           harmonization = harmonization, downscaling = downscaling,

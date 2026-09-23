@@ -25,7 +25,8 @@ calcNonlandInputRecategorized <- function(input, target, youngShareWoodHarvestAr
                 isocountries = FALSE,
                 unit = "bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: Tg yr-1",
                 min = 0,
-                description = "Input data with nonland categories remapped to categories of target dataset"))
+                description = "Input data with nonland categories remapped to categories of target dataset",
+                clean_magpie = FALSE)) # preserve region ids, as calcLandInput does
   }
 
   landMha <- calcOutput("LandInputRecategorized", input = input, target = target, aggregate = FALSE)

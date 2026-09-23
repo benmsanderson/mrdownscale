@@ -108,5 +108,8 @@ calcNonlandHarmonized <- function(input, target, harmonizationPeriod, harmonizat
               isocountries = FALSE,
               unit = "harvest_weight & bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: kg ha-1 yr-1",
               min = 0,
-              description = "Harmonized nonland data"))
+              description = "Harmonized nonland data",
+              # iamc regions carry an id, as the Land functions keep;
+              # cleaning drops it and the two sides stop matching
+              clean_magpie = !startsWith(input, "iamc")))
 }

@@ -127,5 +127,8 @@ calcWoodHarvestAreaHarmonized <- function(input, target, harmonizationPeriod, ha
               isocountries = FALSE,
               unit = "Mha yr-1",
               min = 0,
-              description = "Harmonized wood harvest area data"))
+              description = "Harmonized wood harvest area data",
+              # iamc regions carry an id, as the Land functions keep; cleaning
+              # drops it and the two sides stop matching
+              clean_magpie = !startsWith(input, "iamc")))
 }

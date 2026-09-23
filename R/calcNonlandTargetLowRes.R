@@ -63,5 +63,8 @@ calcNonlandTargetLowRes <- function(input, target, endOfHistory) {
               isocountries = FALSE,
               unit = "harvest_weight & bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: kg ha-1 yr-1",
               min = 0,
-              description = "Land target data at the same low resolution as the input dataset for harmonization"))
+              description = "Land target data at the same low resolution as the input dataset for harmonization",
+              # iamc regions carry an id, as the Land functions keep;
+              # cleaning drops it and the two sides stop matching
+              clean_magpie = !startsWith(input, "iamc")))
 }

@@ -13,7 +13,7 @@
 #' @return data prepared to be written as a LUH-style transitions.nc file
 #' @author Pascal Sauer, Jan Philipp Dietrich
 calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization, downscaling) {
-  nonland <- calcOutput("NonlandReport", outputFormat = outputFormat,
+  nonland <- calcOutput("NonlandReport", outputFormat = outputFormat, input = input,
                         harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                         harmonization = harmonization, downscaling = downscaling, aggregate = FALSE)
 
