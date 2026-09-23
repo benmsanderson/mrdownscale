@@ -61,13 +61,32 @@ test_that("forest parts are rescaled to the reported forest total", {
   expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
 })
 
-test_that("a nested forest split is refused", {
+test_that("a nested forest split is set aside, keeping the forest total", {
   # AIM reports secondary forest equal to its forest total, primary inside it
   nested <- clean
   nested$Value[nested$Variable == "Land_Cover_Forest_Secondary"] <- 40
 
-  expect_error(toolIAMCLandCategories(nested),
-               "do not partition Land_Cover_Forest")
+  expect_warning(x <- toolIAMCLandCategories(nested), "does not add up to the forest total")
+
+  # the total is kept; primary is left to harmonization, which derives it from
+  # the target whatever the input said
+  expect_equal(as.vector(dimSums(x[, 2020, c("Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary",
+                                             "Land_Cover_Forest_Planted")], dim = 3)), c(40, 40))
+  expect_equal(as.vector(x[, 2020, "Land_Cover_Forest_Primary"]), c(0, 0))
+  expect_equal(as.vector(x[, 2020, "Land_Cover_Forest_Planted"]), c(5, 5))
+  expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
+})
+
+test_that("a model reporting no forest split keeps its forest total", {
+  # GCAM reports Land Cover|Forest and nothing below it
+  noSplit <- clean[!clean$Variable %in% c("Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary",
+                                          "Land_Cover_Forest_Planted"), ]
+
+  expect_message(x <- toolIAMCLandCategories(noSplit), "no forest split is reported")
+
+  expect_equal(as.vector(x[, 2020, "Land_Cover_Forest_Secondary"]), c(40, 40))
+  expect_equal(as.vector(x[, 2020, "Land_Cover_Forest_Primary"]), c(0, 0))
+  expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
 })
 
 test_that("categories that are not reported are filled with zeros", {
@@ -112,4 +131,18 @@ test_that("an increase in primary forest is moved into secondary forest", {
   expect_equal(as.vector(x[, 2050, "Land_Cover_Forest_Primary"]), c(10, 10))
   expect_equal(as.vector(x[, 2050, "Land_Cover_Forest_Secondary"]), c(25, 25))
   expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
+})
+
+test_that("a drifting land total is held at its first year", {
+  # IMAGE's reported Land Cover moves by 0.42 Mha over time; the downscaler
+  # refuses a stock that is not constant
+  drifting <- clean
+  drifting$Value[drifting$Variable == "Land_Cover" & drifting$Year == 2050] <- 100.5
+
+  expect_message(x <- toolIAMCLandCategories(drifting), "drifts by up to")
+
+  expect_equal(as.vector(dimSums(x, dim = 3)), rep(100, 4))
+  # the difference goes where the rest of the unaccounted area goes
+  expect_equal(as.vector(x[, 2050, "Land_Cover_Other_Natural"]),
+               as.vector(x[, 2020, "Land_Cover_Other_Natural"]))
 })

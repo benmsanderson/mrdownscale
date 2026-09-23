@@ -7,10 +7,11 @@
 #' break it down, so three things are handled here:
 #' \itemize{
 #'   \item Primary, secondary and planted forest are rescaled to add up to the
-#'   reported Land Cover|Forest total. Some models nest them instead of
-#'   partitioning them (AIM reports secondary forest equal to its forest
-#'   total, with primary inside it); that is an error rather than a rescale,
-#'   because the forest state would otherwise be silently wrong.
+#'   reported Land Cover|Forest total where they are reported and consistent.
+#'   Where they are not - IMAGE overshoots by up to 9%, AIM reports secondary
+#'   forest equal to its total with primary inside it, GCAM reports no split -
+#'   the split is set aside and the forest total kept, since harmonization
+#'   derives primary forest from the target regardless of what the input said.
 #'   \item Other Land is ignored, because models disagree on whether it sits
 #'   beside the other categories or inside one of them. Instead whatever
 #'   Land Cover does not otherwise account for is added to other natural
@@ -31,10 +32,10 @@
 #' @author Ben Sanderson
 toolIAMCLandCategories <- function(x) {
   required <- c("Land_Cover", "Land_Cover_Cropland", "Land_Cover_Pasture",
-                "Land_Cover_Forest", "Land_Cover_Forest_Primary",
-                "Land_Cover_Forest_Secondary", "Land_Cover_Forest_Planted",
-                "Land_Cover_Other_Natural")
-  optional <- c("Land_Cover_Built_Up_Area", "Land_Cover_Cropland_Energy_Crops")
+                "Land_Cover_Forest", "Land_Cover_Other_Natural")
+  optional <- c("Land_Cover_Built_Up_Area", "Land_Cover_Cropland_Energy_Crops",
+                "Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary",
+                "Land_Cover_Forest_Planted")
 
   missingVariables <- setdiff(required, x$Variable)
   if (length(missingVariables) > 0) {
@@ -53,7 +54,8 @@ toolIAMCLandCategories <- function(x) {
   out <- as.magpie(x[, c("Region", "Year", "Variable", "Value")],
                    spatial = "Region", temporal = "Year")
 
-  for (variable in setdiff(optional, getItems(out, dim = 3))) {
+  for (variable in setdiff(grep("Forest", optional, invert = TRUE, value = TRUE),
+                           getItems(out, dim = 3))) {
     toolStatusMessage("note", paste0(variable, " is not reported, filling with zeros"))
     out <- add_columns(out, variable, fill = 0)
   }
@@ -67,16 +69,53 @@ toolIAMCLandCategories <- function(x) {
     out[out < 0] <- 0
   }
 
-  forestParts <- c("Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary",
-                   "Land_Cover_Forest_Planted")
-  partSum <- dimSums(out[, , forestParts], dim = 3)
+  # Forest. Models report the split inconsistently: IMAGE's parts exceed its
+  # forest total by up to 9%, AIM reports secondary forest equal to the total
+  # with primary inside it, GCAM reports no split at all. None of that need
+  # stop a run, because the split does not survive harmonization - for years
+  # from the harmonization start on, toolHarmonizeFadeForest derives primary
+  # forest from the target's own trajectory and the harmonized forest total,
+  # whatever the input said (see its tests). So a usable split is rescaled to
+  # the reported total, and an unusable one is set aside, with the forest
+  # total kept either way.
+  forestParts <- c("Land_Cover_Forest_Primary", "Land_Cover_Forest_Secondary")
   forest <- collapseDim(out[, , "Land_Cover_Forest"], dim = 3)
-  offset <- abs(partSum - forest)
-  if (any(offset > 0.01 * forest & offset > 1)) {
-    stop("Forest subcategories do not partition Land_Cover_Forest, worst case ",
-         round(max(offset), 1), " Mha. This model needs a prior for the forest split.")
+  planted <- if ("Land_Cover_Forest_Planted" %in% getItems(out, dim = 3)) {
+    pmin(collapseDim(out[, , "Land_Cover_Forest_Planted"], dim = 3), forest)
+  } else {
+    forest * 0
   }
-  out[, , forestParts] <- out[, , forestParts] * ifelse(partSum > 0, forest / partSum, 1)
+  reportedSplit <- all(forestParts %in% getItems(out, dim = 3))
+  usableSplit <- FALSE
+  if (reportedSplit) {
+    partSum <- dimSums(out[, , c(forestParts, "Land_Cover_Forest_Planted")[
+      c(forestParts, "Land_Cover_Forest_Planted") %in% getItems(out, dim = 3)]], dim = 3)
+    offset <- abs(partSum - forest)
+    usableSplit <- !any(offset > 0.01 * forest & offset > 1)
+    if (!usableSplit) {
+      toolStatusMessage("warn", paste0("the reported forest split does not add up to the forest ",
+                                       "total, by up to ", round(max(offset), 1), " Mha; setting it ",
+                                       "aside and keeping the total, which is what harmonization uses"))
+    }
+  } else {
+    toolStatusMessage("note", "no forest split is reported; keeping the forest total, which is what harmonization uses")
+  }
+
+  if (usableSplit) {
+    parts <- c(forestParts, "Land_Cover_Forest_Planted")
+    parts <- parts[parts %in% getItems(out, dim = 3)]
+    partSum <- dimSums(out[, , parts], dim = 3)
+    out[, , parts] <- out[, , parts] * ifelse(partSum > 0, forest / partSum, 1)
+  } else {
+    # all forest that is not a plantation becomes secondary; primary forest
+    # is left to harmonization
+    out <- add_columns(out, setdiff(c(forestParts, "Land_Cover_Forest_Planted"),
+                                    getItems(out, dim = 3)), fill = 0)
+    out[, , "Land_Cover_Forest_Primary"] <- 0
+    out[, , "Land_Cover_Forest_Secondary"] <- forest - planted
+    out[, , "Land_Cover_Forest_Planted"] <- planted
+  }
+  forestParts <- c(forestParts, "Land_Cover_Forest_Planted")
 
   # primary forest cannot expand by definition, but reported values drift up
   # by rounding (0.085 Mha in one VL region-step); move any increase into
@@ -96,6 +135,18 @@ toolIAMCLandCategories <- function(x) {
   reported <- c("Land_Cover_Cropland", "Land_Cover_Pasture", "Land_Cover_Forest",
                 "Land_Cover_Built_Up_Area", "Land_Cover_Other_Natural")
   landCover <- collapseDim(out[, , "Land_Cover"], dim = 3)
+  # land area cannot change, but a reported total can drift - IMAGE's moves by
+  # 0.42 Mha - and the downscaler refuses a stock that is not constant. Hold
+  # the total at its first year; the difference joins the residual below.
+  firstYear <- getYears(landCover)[1]
+  drift <- max(abs(landCover - as.vector(landCover[, firstYear, ])))
+  if (drift > 10^-6) {
+    toolStatusMessage("note", paste0("the reported land total drifts by up to ", round(drift, 2),
+                                     " Mha; holding it at its ", firstYear, " value"))
+    for (year in getYears(landCover)) {
+      landCover[, year, ] <- as.vector(landCover[, firstYear, ])
+    }
+  }
   residual <- landCover - dimSums(out[, , reported], dim = 3)
   if (any(abs(residual) > 0.01 * landCover)) {
     toolStatusMessage("warn", paste0("Land categories miss the Land_Cover total by up to ",
