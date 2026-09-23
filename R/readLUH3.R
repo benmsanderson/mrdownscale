@@ -27,7 +27,15 @@ readLUH3 <- function(subtype, subset) {
   years <- intersect(subset, 850:2024)
 
   readLayers <- function(nc, variables, years) {
-    yearIndizes <- years - 849 # LUH data starts in 850
+    # take the years from the file's own time axis rather than assuming it
+    # starts in 850, so that a subset of the published file reads the same way
+    fileYears <- as.integer(format(terra::time(terra::rast(nc, subds = variables[1])), "%Y"))
+    missingYears <- setdiff(years, fileYears)
+    if (length(missingYears) > 0) {
+      stop(nc, " does not hold ", length(missingYears), " of the requested years (",
+           min(missingYears), " to ", max(missingYears), ")")
+    }
+    yearIndizes <- match(years, fileYears)
     return(terra::rast(nc, lyrs = paste0(rep(variables, each = length(yearIndizes)), "_", yearIndizes)))
   }
 
@@ -67,8 +75,18 @@ readLUH3 <- function(subtype, subset) {
   } else if (subtype == "transitions") {
     woodland <- c("primf", "primn", "secmf", "secyf", "secnf", "pltns")
     variables <- c(paste0(woodland, "_harv"), paste0(woodland, "_bioh"))
-    x <- readLayers("multiple-transitions_input4MIPs_landState_CMIP_UofMD-landState-3-1-1_gn_0850-2023.nc",
-                    variables, years - 1)
+    # the published transitions file is 17.4 GB and holds every transition
+    # since 850; only these twelve wood harvest variables are read from it, so
+    # a server-side subset of them is accepted in its place (see
+    # scripts/fetch_luh3_harvest.py in the graft repository)
+    published <- "multiple-transitions_input4MIPs_landState_CMIP_UofMD-landState-3-1-1_gn_0850-2023.nc"
+    subsets <- sort(Sys.glob("multiple-transitions_woodharvest_*.nc"), decreasing = TRUE)
+    nc <- if (file.exists(published)) published else subsets[1]
+    if (is.na(nc)) {
+      stop("no LUH3 transitions found: neither ", published,
+           " nor a multiple-transitions_woodharvest_*.nc subset of it")
+    }
+    x <- readLayers(nc, variables, years - 1)
 
     unit <- "*_bioh: kg C yr-1, *_harv: 1"
   } else {

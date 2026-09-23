@@ -179,23 +179,7 @@ calcLandInput <- function(input) { # before adding args, consider: many function
     expectedCategories <- unique(refmap$data)
     primf <- "Land_Cover_Forest_Primary"
   } else if (input == "iamc" || startsWith(input, "iamc:")) {
-    x <- readSource("IAMC")
-
-    # an IAMC release may hold several scenarios; input = "iamc:<scenario>"
-    # picks one, e.g. input = "iamc:Very Low - SSP1 (Marker)"
-    if (startsWith(input, "iamc:")) {
-      scenario <- sub("^iamc:", "", input)
-      if (!scenario %in% x$Scenario) {
-        stop("Scenario \"", scenario, "\" not found, available: \"",
-             paste(unique(x$Scenario), collapse = "\", \""), "\"")
-      }
-      x <- x[x$Scenario == scenario, ]
-    }
-    if (length(unique(x$Scenario)) != 1 || length(unique(x$Model)) != 1) {
-      stop("Expected exactly one model and scenario, found \"",
-           paste(unique(paste(x$Model, x$Scenario)), collapse = "\", \""),
-           "\"; select one with input = \"iamc:<scenario>\"")
-    }
+    x <- toolSelectIAMCScenario(readSource("IAMC"), input)
     landVariables <- c("Land_Cover", "Land_Cover_Cropland", "Land_Cover_Pasture",
                        "Land_Cover_Forest", "Land_Cover_Forest_Primary",
                        "Land_Cover_Forest_Secondary", "Land_Cover_Forest_Planted",

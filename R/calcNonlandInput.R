@@ -7,7 +7,12 @@
 #' data other constraints apply, e.g. the total area must be constant over time.
 #' Fertilizer on regional level is disaggregated to cluster level using cropland as weight.
 #'
-#' @param input name of an input dataset, currently only "magpie"
+#' input = "iamc": the reported wood harvest volume and nitrogen fertilizer
+#' total. IAMC says nothing about which forest the wood comes from or the area
+#' it takes, so those come from the target's history in
+#' \code{\link{calcNonlandInputRecategorized}}.
+#'
+#' @param input name of an input dataset, "magpie" or "iamc[:<scenario>]"
 #' @return nonland input data
 #' @author Pascal Sauer
 calcNonlandInput <- function(input) { # before adding args, consider: many functions @inheritParams from this function
@@ -58,6 +63,49 @@ calcNonlandInput <- function(input) { # before adding args, consider: many funct
     stopifnot(min(fertilizer) >= 0)
 
     out <- mbind(woodHarvestWeightSource, woodHarvestWeightType, woodHarvestArea, fertilizer)
+    unit <- "harvest_weight: kg C yr-1; harvest_area: Mha yr-1; fertilizer: Tg yr-1"
+  } else if (startsWith(input, "iamc")) {
+    # IAMC reports a harvest volume and a fertilizer total, and nothing about
+    # which forest the wood comes from or how much area it takes. Those are
+    # supplied in calcNonlandInputRecategorized from the target's own history,
+    # so what is reported is kept as reported here.
+    x <- toolSelectIAMCScenario(readSource("IAMC"), input)
+    wanted <- c(wood_harvest_demand.roundwood = "Forestry_Production_Roundwood",
+                wood_harvest_demand.industrial = "Forestry_Production_Roundwood_Industrial_Roundwood",
+                wood_harvest_demand.fuel = "Forestry_Production_Roundwood_Wood_Fuel",
+                fertilizer.nitrogen = "Fertilizer_Use_Nitrogen")
+    missingVariables <- setdiff(wanted, x$Variable)
+    if (length(missingVariables) > 0) {
+      stop("Missing required variables: \"", paste(missingVariables, collapse = "\", \""), "\"")
+    }
+    x <- x[x$Variable %in% wanted & x$Region != "World", ]
+    stopifnot(x$Unit[x$Variable == wanted[["fertilizer.nitrogen"]]] == "Tg N/yr",
+              x$Unit[startsWith(x$Variable, "Forestry")] == "million m3/yr")
+
+    x <- x[, c("Region", "Year", "Variable", "Value")]
+    out <- as.magpie(x, spatial = "Region", temporal = "Year")
+    out <- out[, , wanted]
+    getItems(out, dim = 3, raw = TRUE) <- names(wanted)
+    names(dimnames(out))[3] <- "category.data"
+
+    if (anyNA(out)) {
+      # the harvest and fertilizer variables can report on a coarser year grid
+      # than the land tree; keep the years all of them have
+      complete <- getYears(out)[!apply(is.na(as.array(out)), 2, any)]
+      toolStatusMessage("note", paste0("nonland input reports ", length(complete), " years, ",
+                                       min(getYears(complete, as.integer = TRUE)), " to ",
+                                       max(getYears(complete, as.integer = TRUE))))
+      out <- out[, complete, ]
+    }
+    if (any(out < 0)) {
+      toolStatusMessage("warn", "Negative values detected, replacing with 0.")
+      out[out < 0] <- 0
+    }
+
+    mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
+    out <- toolAggregate(out, unique(mapping[, c("region", "lowRes")]))
+    names(dimnames(out)) <- c("region.id", "year", "category.data")
+    unit <- "harvest_demand: million m3 yr-1; fertilizer: Tg yr-1"
   } else {
     stop("Unsupported input dataset \"", input, "\"")
   }
@@ -66,14 +114,18 @@ calcNonlandInput <- function(input) { # before adding args, consider: many funct
   toolExpectTrue(identical(unname(getSets(out)), c("region", "id", "year", "category", "data")),
                  "Dimensions are named correctly")
   toolExpectTrue(all(out >= 0), "All values are >= 0")
-  toolExpectLessDiff(fertilizerRaw, fertilizer, 10^-5,
-                     paste0("Setting fertilizer to zero where there is no cropland ",
-                            "does not change fertilizer significantly"))
-  toolCheckFertilizer(out[, , "fertilizer"], land)
+  if (input == "magpie") {
+    toolExpectLessDiff(fertilizerRaw, fertilizer, 10^-5,
+                       paste0("Setting fertilizer to zero where there is no cropland ",
+                              "does not change fertilizer significantly"))
+    toolCheckFertilizer(out[, , "fertilizer"], land)
+  }
 
   return(list(x = out,
               isocountries = FALSE,
-              unit = "harvest_weight: kg C yr-1; harvest_area: Mha yr-1; fertilizer: Tg yr-1",
+              unit = unit,
               min = 0,
-              description = "Nonland input data for data harmonization and downscaling pipeline"))
+              description = "Nonland input data for data harmonization and downscaling pipeline",
+              # iamc regions carry an id, as in calcLandInput; cleaning drops it
+              clean_magpie = !startsWith(input, "iamc")))
 }

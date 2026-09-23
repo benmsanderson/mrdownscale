@@ -16,6 +16,18 @@
 #' @author Pascal Sauer
 calcNonlandInputRecategorized <- function(input, target, youngShareWoodHarvestArea = 0.95,
                                           youngShareWoodHarvestWeight = 0.5) {
+  if (startsWith(input, "iamc")) {
+    # IAMC reports a harvest volume and a fertilizer total; the split across
+    # source forests, the harvested area and the split across crops come from
+    # the target's history
+    x <- toolIAMCNonlandRecategorized(input, target)
+    return(list(x = x,
+                isocountries = FALSE,
+                unit = "bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: Tg yr-1",
+                min = 0,
+                description = "Input data with nonland categories remapped to categories of target dataset"))
+  }
+
   landMha <- calcOutput("LandInputRecategorized", input = input, target = target, aggregate = FALSE)
   landInput <- calcOutput("LandInput", input = input, aggregate = FALSE)
   landInput <- landInput[getItems(landMha, 1), , ] # in case low res target is used for development
