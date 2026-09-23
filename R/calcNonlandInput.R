@@ -73,7 +73,16 @@ calcNonlandInput <- function(input) { # before adding args, consider: many funct
     wanted <- c(wood_harvest_demand.roundwood = "Forestry_Production_Roundwood",
                 wood_harvest_demand.industrial = "Forestry_Production_Roundwood_Industrial_Roundwood",
                 wood_harvest_demand.fuel = "Forestry_Production_Roundwood_Wood_Fuel",
-                fertilizer.nitrogen = "Fertilizer_Use_Nitrogen")
+                fertilizer.nitrogen = "Fertilizer_Use_Nitrogen_Synthetic")
+    # LUH's fertl layer is a synthetic fertilization rate - its 2020 history,
+    # 114.7 Tg N, matches REMIND's synthetic nitrogen (112.1) rather than its
+    # total nitrogen (148.7), which would step up by 16% at the harmonization
+    # join. Fall back to the total where synthetic is not reported.
+    if (!wanted[["fertilizer.nitrogen"]] %in% x$Variable) {
+      toolStatusMessage("note", paste0("synthetic nitrogen is not reported, using total nitrogen; ",
+                                       "LUH's fertilization rate is synthetic, so this overstates it"))
+      wanted[["fertilizer.nitrogen"]] <- "Fertilizer_Use_Nitrogen"
+    }
     missingVariables <- setdiff(wanted, x$Variable)
     if (length(missingVariables) > 0) {
       stop("Missing required variables: \"", paste(missingVariables, collapse = "\", \""), "\"")

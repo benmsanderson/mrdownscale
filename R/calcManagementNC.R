@@ -30,7 +30,9 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
   }
   x <- x[, , intersect(landManagementVariables, getItems(x, 3))]
 
-  if (input == "magpie") {
+  # iamc input carries fertilizer and the roundwood/fuelwood split too
+  withNonland <- input == "magpie" || startsWith(input, "iamc")
+  if (withNonland) {
     nonland <- calcOutput("NonlandReport", outputFormat = outputFormat, input = input,
                           harmonizationPeriod = harmonizationPeriod,
                           yearsSubset = yearsSubset,
@@ -41,6 +43,8 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
     nonland <- nonland[, , nonlandManagementVariables]
 
     if (outputFormat == "ScenarioMIP") {
+      # LUH3 reports no plantation harvest, so the split between wood products
+      # and fuel is immaterial there; follow magpie and send it to products
       nonland <- add_columns(nonland, "pltns_wdprd", fill = 1)
       nonland <- add_columns(nonland, "pltns_bfuel", fill = 0)
     }
@@ -55,7 +59,7 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
     expectedVariables <- c("irrig_c3ann", "irrig_c3per", "irrig_c4ann", "irrig_c4per", "irrig_c3nfx",
                            "cpbf1_c3ann", "cpbf1_c4ann", "cpbf1_c3per", "cpbf1_c4per", "cpbf1_c3nfx",
                            "cpbf2_c3per", "cpbf2_c4per")
-    if (input == "magpie") {
+    if (withNonland) {
       expectedVariables <- c(expectedVariables,
                              "fertl_c3ann", "fertl_c4ann", "fertl_c3per", "fertl_c4per", "fertl_c3nfx",
                              "rndwd", "fulwd",

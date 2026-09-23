@@ -61,7 +61,9 @@ fullSCENARIOMIP <- function(rev = numeric_version("0"), input = "magpie", scenar
              aggregate = FALSE, file = ncFile, writeArgs = writeArgs)
   do.call(toolAddMetadataNC, c(ncFile = ncFile, metadataArgs))
 
-  if (input == "magpie") {
+  # iamc input carries wood harvest, which is what the ScenarioMIP
+  # transitions file holds
+  if (input == "magpie" || startsWith(input, "iamc")) {
     ncFile <- paste0("multiple-transitions", fileSuffix)
     calcOutput("TransitionsNC", outputFormat = "ScenarioMIP", input = input,
                harmonizationPeriod = harmonizationPeriod,
