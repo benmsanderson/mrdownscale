@@ -11,9 +11,12 @@
 #' @param yearsSubset remove years from the returned data which are not in yearsSubset
 #' @param harmonization name of harmonization method, see \code{\link{toolGetHarmonizer}}
 #' @param downscaling name of downscaling method, currently only "magpieClassic"
+#' @param foldPlantations report the plantation share of secondary forest as
+#' manaf, because \code{\link{calcStatesNC}} has folded the state itself away
 #' @return data prepared to be written as a LUH-style management.nc file
 #' @author Pascal Sauer, Jan Philipp Dietrich
-calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization, downscaling) {
+calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization,
+                             downscaling, foldPlantations = FALSE) {
   x <- calcOutput("LandReport", outputFormat = outputFormat, input = input,
                   harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                   harmonization = harmonization, downscaling = downscaling, aggregate = FALSE)
@@ -27,6 +30,15 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
     landManagementVariables <- c("cpbf1_c3ann", "cpbf1_c3nfx", "cpbf1_c3per", "cpbf1_c4ann", "cpbf1_c4per",
                                  "cpbf2_c3per", "cpbf2_c4per",
                                  "irrig_c3ann", "irrig_c3nfx", "irrig_c3per", "irrig_c4ann", "irrig_c4per")
+  }
+  if (outputFormat == "ScenarioMIP" && foldPlantations) {
+    # what calcStatesNC folded away, kept as the share of secondary forest
+    # that is plantation - the same quantity the ESM format reports as manaf
+    total <- dimSums(x[, , c("pltns", "secdf")], dim = 3)
+    manaf <- x[, , "pltns"] / total
+    manaf[total == 0] <- 0
+    x <- mbind(x, setNames(manaf, "manaf"))
+    landManagementVariables <- c(landManagementVariables, "manaf")
   }
   x <- x[, , intersect(landManagementVariables, getItems(x, 3))]
 
@@ -51,7 +63,8 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
     x <- mbind(x, nonland)
   }
 
-  # account for the time unit written into the nc file by terra: "years since 1970-01-01 0:0:0"
+  # years since the epoch; toolAddMetadataNC converts the written axis to
+  # days, which is what a 365-day calendar can actually express
   x <- setYears(x, getYears(x, as.integer = TRUE) - 1970)
 
   unit <- "1"
@@ -59,6 +72,9 @@ calcManagementNC <- function(outputFormat, input, harmonizationPeriod, yearsSubs
     expectedVariables <- c("irrig_c3ann", "irrig_c3per", "irrig_c4ann", "irrig_c4per", "irrig_c3nfx",
                            "cpbf1_c3ann", "cpbf1_c4ann", "cpbf1_c3per", "cpbf1_c4per", "cpbf1_c3nfx",
                            "cpbf2_c3per", "cpbf2_c4per")
+    if (foldPlantations) {
+      expectedVariables <- c(expectedVariables, "manaf")
+    }
     if (withNonland) {
       expectedVariables <- c(expectedVariables,
                              "fertl_c3ann", "fertl_c4ann", "fertl_c3per", "fertl_c4per", "fertl_c3nfx",

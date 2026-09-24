@@ -42,7 +42,8 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
     x <- mbind(x, transitions)
   }
 
-  # account for unit "years since 1970-01-01 0:0:0"
+  # years since the epoch; toolAddMetadataNC converts the written axis to
+  # days, which is what a 365-day calendar can actually express
   x <- setYears(x, getYears(x, as.integer = TRUE) - 1970)
 
   if (outputFormat == "ScenarioMIP") {

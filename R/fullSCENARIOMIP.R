@@ -19,13 +19,17 @@
 #' @param progress boolean defining whether progress should be printed
 #' @param grossTransitions write the gross land transitions alongside wood
 #' harvest, which the ScenarioMIP deliverable itself does not carry
+#' @param foldPlantations add plantations into secondary forest and report
+#' their share as manaf, so the output splices onto LUH3 history without a
+#' step at the join
 #'
 #' @author Pascal Sauer
 fullSCENARIOMIP <- function(rev = numeric_version("0"), input = "magpie", scenario = "",
                             harmonizationPeriod = c(2025, 2050),
                             yearsSubset = 1995:2100,
                             harmonization = "fadeForest", downscaling = "magpieClassic",
-                            compression = 2, progress = TRUE, grossTransitions = FALSE) {
+                            compression = 2, progress = TRUE, grossTransitions = FALSE,
+                            foldPlantations = FALSE) {
   revision <- if (identical(rev, numeric_version("0"))) format(Sys.time(), "%Y-%m-%d") else rev
 
   fileSuffix <- paste0("_input4MIPs_landState_ScenarioMIP_",
@@ -52,6 +56,7 @@ fullSCENARIOMIP <- function(rev = numeric_version("0"), input = "magpie", scenar
              harmonizationPeriod = harmonizationPeriod,
              yearsSubset = yearsSubset,
              harmonization = harmonization, downscaling = downscaling,
+             foldPlantations = foldPlantations,
              aggregate = FALSE, file = ncFile, writeArgs = writeArgs)
   do.call(toolAddMetadataNC, c(ncFile = ncFile, metadataArgs))
 
@@ -60,6 +65,7 @@ fullSCENARIOMIP <- function(rev = numeric_version("0"), input = "magpie", scenar
              harmonizationPeriod = harmonizationPeriod,
              yearsSubset = yearsSubset,
              harmonization = harmonization, downscaling = downscaling,
+             foldPlantations = foldPlantations,
              aggregate = FALSE, file = ncFile, writeArgs = writeArgs)
   do.call(toolAddMetadataNC, c(ncFile = ncFile, metadataArgs))
 

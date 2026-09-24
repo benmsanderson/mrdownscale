@@ -63,7 +63,7 @@ toolAddMetadataNC <- function(ncFile, activityId, revision, harmonizationPeriod,
   ncdf4::ncatt_put(nc, "time", "long_name", "time")
   ncdf4::ncatt_put(nc, "time", "realtopology", "linear")
   ncdf4::ncatt_put(nc, "time", "standard_name", "time")
-  ncdf4::ncatt_put(nc, "time", "units", "years since 1970-01-01 0:0:0")
+  toolTimeAxis(nc)
 
   # lon
   ncdf4::ncatt_put(nc, "lon", "realtopology", "circular")
