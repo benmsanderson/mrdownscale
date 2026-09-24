@@ -39,7 +39,14 @@ toolIAMCNonlandRecategorized <- function(input, target) {
   cellAreaKm2 <- readSource("LUH3", subtype = "cellArea", convert = FALSE)
   historicYears <- as.integer(terra::time(transitions))
   reported <- getYears(nonland, as.integer = TRUE)
-  calibrationYear <- max(intersect(reported, historicYears))
+  # calibrate where the reported years and the target's history overlap; an
+  # input that begins after the history ends calibrates on its last year
+  overlap <- intersect(reported, historicYears)
+  calibrationYear <- if (length(overlap) > 0) max(overlap) else max(historicYears)
+  if (length(overlap) == 0) {
+    toolStatusMessage("note", paste0("the input reports no historical year; calibrating on the ",
+                                     "target's last, ", calibrationYear))
+  }
   window <- intersect(seq(calibrationYear - 9, calibrationYear), historicYears)
   toolStatusMessage("note", paste0("iamc nonland priors from the target's history: shares and ",
                                    "yields averaged over ", min(window), "-", max(window),

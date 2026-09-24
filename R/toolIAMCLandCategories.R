@@ -140,7 +140,7 @@ toolIAMCLandCategories <- function(x) {
   # the total at its first year; the difference joins the residual below.
   firstYear <- getYears(landCover)[1]
   drift <- max(abs(landCover - as.vector(landCover[, firstYear, ])))
-  if (drift > 10^-6) {
+  if (drift > 10^-3) {  # below a thousand hectares it is floating point, not drift
     toolStatusMessage("note", paste0("the reported land total drifts by up to ", round(drift, 2),
                                      " Mha; holding it at its ", firstYear, " value"))
     for (year in getYears(landCover)) {
