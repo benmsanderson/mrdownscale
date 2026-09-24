@@ -22,11 +22,14 @@
 #' @author Jan Philipp Dietrich, Pascal Sauer
 calcLandTransitions <- function(outputFormat, input, harmonizationPeriod, yearsSubset,
                                 harmonization, downscaling, gross) {
-  if (outputFormat != "ESM") {
-    stop("Can only report for outputFormat = 'ESM'")
+  if (!outputFormat %in% c("ESM", "ScenarioMIP")) {
+    stop("Can only report for outputFormat = 'ESM' or 'ScenarioMIP'")
   }
 
-  land <- calcOutput("LandReport", outputFormat = "ESM", input = input,
+  # ESM reports against luh2mod and folds plantations into secondary forest;
+  # ScenarioMIP reports against luh3 and keeps pltns as a state of its own, so
+  # the transitions follow whichever set of states the caller asked for
+  land <- calcOutput("LandReport", outputFormat = outputFormat, input = input,
                      harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                      harmonization = harmonization, downscaling = downscaling, aggregate = FALSE)
   land <- land[, , grep("(_|manaf)", getItems(land, dim = 3), invert = TRUE, value = TRUE)]

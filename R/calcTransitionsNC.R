@@ -10,9 +10,15 @@
 #' @param yearsSubset remove years from the returned data which are not in yearsSubset
 #' @param harmonization name of harmonization method, see \code{\link{toolGetHarmonizer}}
 #' @param downscaling name of downscaling method, currently only "magpieClassic"
+#' @param grossTransitions write the gross land transitions alongside wood
+#' harvest. The ScenarioMIP deliverable carries only harvest, so this is off by
+#' default and changes nothing for that product; it exists because anything
+#' that tracks secondary land - stand age, biomass, a bookkeeping model - needs
+#' the gross flows, which net state differences cannot give.
 #' @return data prepared to be written as a LUH-style transitions.nc file
 #' @author Pascal Sauer, Jan Philipp Dietrich
-calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization, downscaling) {
+calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization,
+                              downscaling, grossTransitions = FALSE) {
   nonland <- calcOutput("NonlandReport", outputFormat = outputFormat, input = input,
                         harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                         harmonization = harmonization, downscaling = downscaling, aggregate = FALSE)
@@ -21,7 +27,7 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
 
   x <- nonland[, getYears(nonland, as.integer = TRUE) %in% yearsSubset, ]
 
-  if (outputFormat == "ESM") {
+  if (outputFormat == "ESM" || grossTransitions) {
     transitions <- calcOutput("LandTransitions", outputFormat = outputFormat,
                               harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                               harmonization = harmonization, downscaling = downscaling,
@@ -42,6 +48,13 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
   if (outputFormat == "ScenarioMIP") {
     expectedVariables <- c("primf_harv", "secdf_harv", "primn_harv", "secnf_harv", "pltns_harv",
                            "primf_bioh", "secdf_bioh", "primn_bioh", "secnf_bioh", "pltns_bioh")
+    if (grossTransitions) {
+      expectedVariables <- c(expectedVariables,
+                             grep("_to_", getItems(x, 3), value = TRUE))
+      toolStatusMessage("note", paste0("writing ", sum(grepl("_to_", getItems(x, 3))),
+                                       " gross land transitions alongside wood harvest; ",
+                                       "the ScenarioMIP deliverable itself carries only harvest"))
+    }
     toolExpectTrue(setequal(getItems(x, 3), expectedVariables), "variable names are as expected")
   }
 
