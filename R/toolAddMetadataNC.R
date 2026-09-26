@@ -14,10 +14,24 @@
 #' @param ncTitle a string to store in the nc attribute ncTitle
 #' @param referenceDataset a string to store in the nc attribute referenceDataset
 #' @param furtherInfoUrl a string to store in the nc attribute furtherInfoUrl
+#' @param institution a string to store in the nc attribute institution
+#' @param institutionId a string to store in the nc attribute institution_id
+#' @param contact a string to store in the nc attribute contact
+#' @param host a string to store in the nc attribute host
+#' @param downscalingTool a string to store in the nc attribute
+#' harmonization_downscaling_tool
+#' @param comment an optional string to store in the nc attribute comment,
+#' e.g. to declare known limitations of the product; omitted if NULL
 #' @author Pascal Sauer, Jan Philipp Dietrich
 toolAddMetadataNC <- function(ncFile, activityId, revision, harmonizationPeriod,
                               missingValue, compression, resolution, references,
-                              targetMIP, ncTitle, referenceDataset, furtherInfoUrl) {
+                              targetMIP, ncTitle, referenceDataset, furtherInfoUrl,
+                              institution = "Potsdam Institute for Climate Impact Research",
+                              institutionId = "PIK",
+                              contact = "pascal.sauer@pik-potsdam.de, dietrich@pik-potsdam.de",
+                              host = "Potsdam Institute for Climate Impact Research",
+                              downscalingTool = "https://github.com/pik-piam/mrdownscale",
+                              comment = NULL) {
   variableId <- sub("^(multiple-[^_]+).+$", "\\1", basename(ncFile))
   stopifnot(variableId %in% c("multiple-states", "multiple-management", "multiple-transitions"))
   nc <- ncdf4::nc_open(ncFile, write = TRUE)
@@ -27,7 +41,7 @@ toolAddMetadataNC <- function(ncFile, activityId, revision, harmonizationPeriod,
   # global
   dateTime <- strftime(Sys.time(), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   ncdf4::ncatt_put(nc, 0, "activity_id", activityId)
-  ncdf4::ncatt_put(nc, 0, "contact", "pascal.sauer@pik-potsdam.de, dietrich@pik-potsdam.de")
+  ncdf4::ncatt_put(nc, 0, "contact", contact)
   ncdf4::ncatt_put(nc, 0, "Conventions", "CF-1.6")
   ncdf4::ncatt_put(nc, 0, "creation_date", dateTime)
   ncdf4::ncatt_put(nc, 0, "data_structure", "grid")
@@ -37,9 +51,9 @@ toolAddMetadataNC <- function(ncFile, activityId, revision, harmonizationPeriod,
   ncdf4::ncatt_put(nc, 0, "frequency", "yr")
   ncdf4::ncatt_put(nc, 0, "further_info_url", furtherInfoUrl)
   ncdf4::ncatt_put(nc, 0, "grid_label", "gn")
-  ncdf4::ncatt_put(nc, 0, "host", "Potsdam Institute for Climate Impact Research")
-  ncdf4::ncatt_put(nc, 0, "institution_id", "PIK")
-  ncdf4::ncatt_put(nc, 0, "institution", "Potsdam Institute for Climate Impact Research")
+  ncdf4::ncatt_put(nc, 0, "host", host)
+  ncdf4::ncatt_put(nc, 0, "institution_id", institutionId)
+  ncdf4::ncatt_put(nc, 0, "institution", institution)
   ncdf4::ncatt_put(nc, 0, "license", "CC BY 4.0")
   ncdf4::ncatt_put(nc, 0, "nominal_resolution", "50 km")
   ncdf4::ncatt_put(nc, 0, "realm", "land")
@@ -53,9 +67,12 @@ toolAddMetadataNC <- function(ncFile, activityId, revision, harmonizationPeriod,
 
   # added by us
   ncdf4::ncatt_put(nc, 0, "harmonization_period", paste(harmonizationPeriod, collapse = "-"))
-  ncdf4::ncatt_put(nc, 0, "harmonization_downscaling_tool", "https://github.com/pik-piam/mrdownscale")
+  ncdf4::ncatt_put(nc, 0, "harmonization_downscaling_tool", downscalingTool)
   ncdf4::ncatt_put(nc, 0, "reference_dataset", referenceDataset)
   ncdf4::ncatt_put(nc, 0, "source_version", as.character(revision))
+  if (!is.null(comment)) {
+    ncdf4::ncatt_put(nc, 0, "comment", comment)
+  }
 
   # time
   ncdf4::ncatt_put(nc, "time", "axis", "T")
