@@ -15,10 +15,16 @@
 #' default and changes nothing for that product; it exists because anything
 #' that tracks secondary land - stand age, biomass, a bookkeeping model - needs
 #' the gross flows, which net state differences cannot give.
+#' @param foldPlantations fold plantation gross transitions into secondary
+#' forest, to match the states fold in \code{\link{calcStatesNC}}. Without it
+#' the folded secdf state carries plantation dynamics that its own transitions
+#' do not, so an annual state change no longer reconciles with the gross flows.
+#' Only affects the gross transitions; wood harvest (pltns_harv, pltns_bioh) is
+#' left untouched.
 #' @return data prepared to be written as a LUH-style transitions.nc file
 #' @author Pascal Sauer, Jan Philipp Dietrich
 calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization,
-                              downscaling, grossTransitions = FALSE) {
+                              downscaling, grossTransitions = FALSE, foldPlantations = FALSE) {
   nonland <- calcOutput("NonlandReport", outputFormat = outputFormat, input = input,
                         harmonizationPeriod = harmonizationPeriod, yearsSubset = yearsSubset,
                         harmonization = harmonization, downscaling = downscaling, aggregate = FALSE)
@@ -39,6 +45,23 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
     # which is what LUH uses
     getYears(transitions) <- getYears(transitions, as.integer = TRUE) - 1
     transitions <- transitions[, getYears(transitions, as.integer = TRUE) %in% yearsSubset, ]
+
+    if (foldPlantations) {
+      # calcStatesNC adds pltns into secdf and drops the pltns state, so every
+      # gross flow into or out of pltns has to be redirected into secdf to keep
+      # the transitions consistent with the folded states. Flows between pltns
+      # and secdf become secdf-to-secdf self-transitions, which carry no
+      # information and are dropped.
+      items <- getItems(transitions, dim = 3)
+      folded <- sub("^pltns_to_", "secdf_to_", sub("_to_pltns$", "_to_secdf", items))
+      transitions <- toolAggregate(transitions, data.frame(from = items, to = folded), dim = 3)
+      self <- grep("^(.+)_to_\\1$", getItems(transitions, dim = 3), value = TRUE)
+      if (length(self) > 0) {
+        transitions <- transitions[, , self, invert = TRUE]
+      }
+      getSets(transitions, fulldim = FALSE)[3] <- "transitions"
+    }
+
     x <- mbind(x, transitions)
   }
 

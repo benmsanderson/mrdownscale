@@ -78,6 +78,7 @@ fullSCENARIOMIP <- function(rev = numeric_version("0"), input = "magpie", scenar
                yearsSubset = yearsSubset,
                harmonization = harmonization, downscaling = downscaling,
                grossTransitions = grossTransitions,
+               foldPlantations = foldPlantations,
                aggregate = FALSE, file = ncFile, writeArgs = writeArgs)
     do.call(toolAddMetadataNC, c(ncFile = ncFile, metadataArgs))
   }
