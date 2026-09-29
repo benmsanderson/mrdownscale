@@ -46,10 +46,12 @@ toolHarvestConventionLUH3 <- function(x) {
 
     # Transitions derived from net state changes cannot tell "primary cleared
     # for crops" from "primary harvested to secondary, secondary cleared for
-    # crops" in a cell where both happen, and name it the former. LUH harvests
-    # first. So where a cell's secondary land gains, primary conversion to
-    # other uses goes through secondary instead, up to the harvest area the
-    # cell already carries. The states are unchanged.
+    # crops" in a cell where both happen, and name it the former. Where a
+    # cell's secondary land gains, primary conversion to other uses goes
+    # through secondary instead, up to the harvest area the cell already
+    # carries. The states are unchanged. This is an attribution choice fitted
+    # to LUH3's primary clearing, not GLM's rule, which clears primary and
+    # secondary in proportion to their shares of the cell.
     state <- pairs[[primary]][["state"]]
     out <- setdiff(grep(paste0("^", primary, "_to_"), items, value = TRUE), flowName)
     via <- sub(paste0("^", primary, "_to_"), paste0(state, "_to_"), out)
