@@ -52,16 +52,12 @@ twice: VL primary forest fell at 21 Mha/yr where the states said 10.6.
 flow and drops the transition. Harvest area and carbon that no flow backs go
 to the same cell's secondary source. Total harvested carbon is unchanged.
 
-**2. Primary clearing is attributed through secondary where secondary gains
-(`4b32916`).** Net state changes cannot tell "primary cleared for crops" from
-"primary harvested to secondary, secondary cleared for crops" in one cell, and
-book the former. In cells whose secondary land gains, primary conversion to
-other uses now goes through secondary, up to the harvest area the cell
-carries. States are unchanged. This is fitted to LUH3's primary clearing
-(H: 2.51 Mha/yr against 2.08, from 4.90); it is not GLM's rule, which clears
-primary and secondary in proportion to their shares of the cell (CMIP6 GLM
-source, `alternativeSmartFlow`). The commit's title, "as LUH does", overstates
-it.
+**2. Primary land is harvested before it is cleared (`4b32916`).** Net state
+changes cannot tell "primary cleared for crops" from "primary harvested to
+secondary, secondary cleared for crops" in one cell, and book the former. In
+cells whose secondary land gains, primary conversion to other uses now goes
+through secondary, up to the harvest area the cell carries. States are
+unchanged.
 
 **3. Primary forest follows the scenario's wood demand (`7e3cd0a`, opt-in).**
 `fadeForest` caps primary forest at an extrapolation of its historical decline;
