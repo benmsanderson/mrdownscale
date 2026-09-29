@@ -39,7 +39,16 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   }
 
   harmonizer <- toolGetHarmonizer(harmonization)
-  out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  if (harmonization == "fadeForestHarvest") {
+    # primary forest follows the scenario's own wood demand: the primary
+    # harvest area it implies at the target's historical share
+    nonland <- calcOutput("NonlandInputRecategorized", input = input, target = target, aggregate = FALSE)
+    primfHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primf"], dim = 3)
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod,
+                      primfHarvest = magclass::setNames(primfHarvest, "primf"))
+  } else {
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  }
 
   attr(out, "geometry") <- geometry
   attr(out, "crs")      <- crs
