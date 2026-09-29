@@ -25,9 +25,10 @@
 #' harvest area equal to them
 #' @author Ben Sanderson
 toolHarvestConventionLUH3 <- function(x) {
-  # primary source -> (transition carrying its flow to secondary, secondary harvest source)
-  pairs <- list(primf = c(flow = "primf_to_secdf", secondary = "secdf"),
-                primn = c(flow = "primn_to_secdn", secondary = "secnf"))
+  # primary source -> (transition carrying its flow to secondary, secondary harvest
+  # source, secondary state)
+  pairs <- list(primf = c(flow = "primf_to_secdf", secondary = "secdf", state = "secdf"),
+                primn = c(flow = "primn_to_secdn", secondary = "secnf", state = "secdn"))
   items <- getItems(x, dim = 3)
   for (primary in names(pairs)) {
     flowName <- pairs[[primary]][["flow"]]
@@ -42,6 +43,39 @@ toolHarvestConventionLUH3 <- function(x) {
     harv[is.na(harv)] <- 0
     bioh[is.na(bioh)] <- 0
     flow[is.na(flow)] <- 0
+
+    # Transitions derived from net state changes cannot tell "primary cleared
+    # for crops" from "primary harvested to secondary, secondary cleared for
+    # crops" in a cell where both happen, and name it the former. LUH harvests
+    # first. So where a cell's secondary land gains, primary conversion to
+    # other uses goes through secondary instead, up to the harvest area the
+    # cell already carries. The states are unchanged.
+    state <- pairs[[primary]][["state"]]
+    out <- setdiff(grep(paste0("^", primary, "_to_"), items, value = TRUE), flowName)
+    via <- sub(paste0("^", primary, "_to_"), paste0(state, "_to_"), out)
+    out <- out[via %in% items]
+    via <- via[via %in% items]
+    if (length(out) > 0) {
+      values <- function(names) {
+        a <- as.array(x[, , names, drop = FALSE])
+        a[is.na(a)] <- 0
+        a
+      }
+      gain <- rowSums(values(grep(paste0("_to_", state, "$"), items, value = TRUE)), dims = 2) -
+        rowSums(values(grep(paste0("^", state, "_to_"), items, value = TRUE)), dims = 2)
+      conv <- values(out)
+      total <- rowSums(conv, dims = 2)
+      room <- pmax(as.array(harv)[, , 1] - as.array(flow)[, , 1], 0)
+      reroute <- ifelse(gain > 0, pmin(total, room), 0)
+      moved <- conv * array(ifelse(total > 0, reroute / total, 0), dim(conv))
+      x[, , out] <- conv - moved
+      x[, , via] <- values(via) + moved
+      flow[, , ] <- as.array(flow) + array(reroute, dim(as.array(flow)))
+      toolStatusMessage("note", paste0(
+        "LUH3 harvest convention: ", signif(sum(reroute) / max(sum(total), .Machine$double.eps) * 100, 3),
+        "% of ", primary, " conversion to other uses routed through ", state,
+        " in cells where ", state, " gains"))
+    }
 
     # the share of the old harvest area the flow still backs, and the carbon it keeps
     kept <- flow / harv
