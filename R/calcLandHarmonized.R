@@ -33,13 +33,24 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   # IAMC forest follows the reporting model's definition, not LUH's, and the
   # harmonizers all converge on the input's forest total; shift the level onto
   # the target's definition at the start of harmonization, keeping the
-  # input's forest changes. See toolForestCrosswalk.
+  # input's forest changes. See toolForestCrosswalk. Urban land gets the same
+  # treatment, since models report it on their own definitions or not at all.
   if (startsWith(input, "iamc")) {
     xInput <- toolForestCrosswalk(xInput, xTarget, year = harmonizationPeriod[1])
+    xInput <- toolUrbanCrosswalk(xInput, xTarget, year = harmonizationPeriod[1])
   }
 
   harmonizer <- toolGetHarmonizer(harmonization)
-  out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  if (harmonization == "fadeForestHarvest") {
+    # primary forest follows the scenario's own wood demand: the primary
+    # harvest area it implies at the target's historical share
+    nonland <- calcOutput("NonlandInputRecategorized", input = input, target = target, aggregate = FALSE)
+    primfHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primf"], dim = 3)
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod,
+                      primfHarvest = magclass::setNames(primfHarvest, "primf"))
+  } else {
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  }
 
   attr(out, "geometry") <- geometry
   attr(out, "crs")      <- crs

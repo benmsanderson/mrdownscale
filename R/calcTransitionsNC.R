@@ -20,7 +20,9 @@
 #' the folded secdf state carries plantation dynamics that its own transitions
 #' do not, so an annual state change no longer reconciles with the gross flows.
 #' Only affects the gross transitions; wood harvest (pltns_harv, pltns_bioh) is
-#' left untouched.
+#' left untouched. With gross transitions in the ScenarioMIP format, the
+#' primary-to-secondary flow is booked as harvest, as LUH3 does, see
+#' \code{\link{toolHarvestConventionLUH3}}.
 #' @return data prepared to be written as a LUH-style transitions.nc file
 #' @author Pascal Sauer, Jan Philipp Dietrich
 calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSubset, harmonization,
@@ -63,6 +65,12 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
     }
 
     x <- mbind(x, transitions)
+
+    if (outputFormat == "ScenarioMIP") {
+      # the ScenarioMIP format claims LUH3's semantics, where harvest - not a
+      # transition - carries primary land to secondary
+      x <- toolHarvestConventionLUH3(x)
+    }
   }
 
   # years since the epoch; toolAddMetadataNC converts the written axis to
