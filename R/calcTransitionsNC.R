@@ -69,7 +69,10 @@ calcTransitionsNC <- function(outputFormat, input, harmonizationPeriod, yearsSub
     if (outputFormat == "ScenarioMIP") {
       # the ScenarioMIP format claims LUH3's semantics, where harvest - not a
       # transition - carries primary land to secondary
-      x <- toolHarvestConventionLUH3(x)
+      # carbon moves within the input's regions, where harvest was set
+      mapping <- calcOutput("ResolutionMapping", input = input, target = "luh3", aggregate = FALSE)
+      region <- mapping$lowRes[match(getItems(x, dim = 1), mapping$cell)]
+      x <- toolHarvestConventionLUH3(x, region = if (anyNA(region)) NULL else region)
     }
   }
 
