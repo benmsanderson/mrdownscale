@@ -32,7 +32,7 @@ Options marked *opt-in* leave upstream's default output unchanged.
 | fadeForest time step | `fe778bf` | primary forest's extrapolated decline per year, not per output step (upstream PR #72) |
 | primary forest from wood demand | `7e3cd0a` | *opt-in* harmonization `fadeForestHarvest`, below |
 | ScenarioMIP writer: gross transitions | `dcbece9` `51a86a4` | *opt-in* gross transitions, and plantations folded into secondary forest to match the states |
-| ScenarioMIP writer: LUH3 harvest semantics | `373451d` | with gross transitions only; below (`4b32916`, a re-routing of primary clearing, was tried and withdrawn in `58da5c2`) |
+| ScenarioMIP writer: LUH3 harvest semantics | `373451d` `3e3d041` `58781ef` | with gross transitions only; below (`4b32916`, a re-routing of primary clearing, was tried and withdrawn in `58da5c2`; the cell-by-cell rule of `58781ef` restores it on a different ground) |
 | ScenarioMIP writer: time axis, history splice | `c5d4e9f` | a decodable time axis; output starts from LUH3 history |
 | attribution | `3340489` | CICERO/graft attribution and declared limitations; fork only |
 
@@ -49,9 +49,28 @@ LUH3 scenarios.
 that flow as a transition, while the harvest area was the whole primary
 decline, so read with LUH3's rule, as an ESM reads it, every hectare moved
 twice: VL primary forest fell at 21 Mha/yr where the states said 10.6.
-`toolHarvestConventionLUH3` sets the primary harvest area cell by cell to the
-flow and drops the transition. Harvest area and carbon that no flow backs go
-to the same cell's secondary source. Total harvested carbon is unchanged.
+`toolHarvestConventionLUH3` drops the transition and books the flow as harvest.
+
+*Revised 2 October (`3e3d041`, `58781ef`).* The first version set the harvest
+area to the derived flow and moved the rest of the harvest, with its carbon,
+to secondary forest. That emptied primary harvest in the target's own history
+(2024: 0.214 PgC against LUH3's 0.658, totals matching), because gross
+transitions derived from net states cannot see primary land harvested and
+then cleared in one step, and because the wood-harvest chain spreads its
+regional harvest over cells independently of where primary land declines.
+mrdownscale's chain defines primary harvest as the whole primary decline; the
+rule now applies that definition cell by cell: each cell's primary harvest
+area is its decline, all its primary conversions go through secondary land
+(`primf_to_c3ann` becomes `secdf_to_c3ann`), and harvest carbon in cells with
+no decline moves, at its harvested density, to the region's cells whose
+decline the chain did not cover; only what a region cannot place goes to
+secondary forest (8-12% of primary harvest carbon in VL and H). States are
+unchanged. Primary harvest in the history years now matches LUH3 within 4%
+(H 2020, 2023, 2024: 0.642, 0.663, 0.658 PgC against 0.665, 0.658, about
+0.66), and it is smooth through the harmonization start (H 2025, 2030, 2050:
+0.670, 0.660, 0.723). The cost: no primary land is cleared directly, where
+LUH3 clears 2-3 Mha/yr in H; it is harvested first, then cleared as
+secondary land.
 
 **2. Primary forest follows the scenario's wood demand (`7e3cd0a`, opt-in).**
 `fadeForest` caps primary forest at an extrapolation of its historical decline;
