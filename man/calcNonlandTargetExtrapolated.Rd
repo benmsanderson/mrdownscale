@@ -22,7 +22,8 @@ extrapolated nonland target data
 Aggregated low resolution target data is extrapolated to the given years
 using toolExtrapolate. To extrapolate wood harvest weight (bioh) multiply
 wood harvest area already extrapolated by calcLandTargetExtrapolated with
-the historical wood harvest rate in kg C per Mha. Fertilizer is extrapolated
+the wood harvest rate in kg C per Mha of the last historical year (see
+\code{\link{toolHarvestDensity}}). Fertilizer is extrapolated
 and returned in kg ha-1 yr-1.
 }
 \examples{
