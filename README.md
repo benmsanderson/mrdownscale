@@ -25,6 +25,7 @@ Options marked *opt-in* leave upstream's default output unchanged.
 | purpose | commit(s) | what changes |
 |---|---|---|
 | IAMC input | `d564f82` `f891f95` `4877f5e` `0fed242` | `readIAMC` and its land categories: land states from an IAMC release |
+| IAMC energy crops | `582ff19` | `Cropland|Energy Crops` to dedicated bioenergy (begr, betr) only, by the IAMC definition; first-generation biofuel to other cropland |
 | country per cell | `d61dfed` | country of each grid cell from LUH3's `ccode`, no MAgPIE clustermap |
 | IAMC wood harvest and fertilizer | `64afe7a` `65b24eb` `ad69db6` `53dd312` `ccaa796` | nonland input from reported roundwood and nitrogen, split with LUH3's history |
 | forest and urban definitions | `976d009` `335629b` `e310623` | IAMC forest and urban land put on LUH's definitions before harmonizing (crosswalks) |
