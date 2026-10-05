@@ -16,10 +16,12 @@
 #' pltns together, since LUH counts plantations as secondary forest) the input
 #' has than the target at the calibration year, and moves that difference
 #' between forest and non-forested natural land, primary to primary and
-#' secondary to secondary: surplus forest goes from primf to primn and from
-#' secdf to secdn, a shortfall comes back the other way. The split between
-#' primary and secondary follows the source group's composition at the
-#' calibration year. Each category is shifted by a fixed amount in every year,
+#' the other way for a shortfall. It is taken from the input's source group as
+#' that group is composed at the calibration year, and given to the receiving
+#' group as the target's own receiving group is composed then: the input's
+#' primary/secondary split is the model's own definition, which harmonization
+#' replaces anyway, and weighting by it moved up to 89 Mha between primary and
+#' secondary non-forest in REMIND-MAgPIE and COFFEE. Each category is shifted by a fixed amount in every year,
 #' so every category's change over time is kept exactly - including that
 #' primary land never expands. Plantations are forest under both definitions
 #' and are left alone. Total area is unchanged.
@@ -55,16 +57,27 @@ toolForestCrosswalk <- function(xInput, xTarget, year) {
     # surplus forest leaves forest for non-forest, a shortfall the other way
     from <- if (e > 0) c(primary = "primf", secondary = "secdf") else c(primary = "primn", secondary = "secdn")
     to <- if (e > 0) c(primary = "primn", secondary = "secdn") else c(primary = "primf", secondary = "secdf")
+    # taken from the input as its source group is composed, so it is there to take
     base <- as.vector(xInput[region, year, from])
     share <- if (sum(base) > 0) base / sum(base) else c(0.5, 0.5)
+    moved <- 0
     for (k in 1:2) {
       amount <- abs(e) * share[k]
       available <- as.vector(xInput[region, , from[k]])
-      moved <- pmin(amount, available)
-      shortfall <- max(shortfall, amount - min(moved))
-      xInput[region, , from[k]] <- available - moved
-      xInput[region, , to[k]] <- as.vector(xInput[region, , to[k]]) + moved
+      taken <- pmin(amount, available)
+      shortfall <- max(shortfall, amount - min(taken))
+      xInput[region, , from[k]] <- available - taken
+      moved <- moved + taken
     }
+    # and given as the target's own receiving group is composed at the
+    # calibration year: the input's primary/secondary split is a model's own
+    # definition, and harmonization replaces it anyway
+    receiving <- as.vector(xTarget[region, year, to])
+    toPrimary <- if (sum(receiving) > 0) receiving[1] / sum(receiving) else share[1]
+    # what primary land receives never grows over time, so it cannot expand
+    primaryPart <- cummin(moved * toPrimary)
+    xInput[region, , to[["primary"]]] <- as.vector(xInput[region, , to[["primary"]]]) + primaryPart
+    xInput[region, , to[["secondary"]]] <- as.vector(xInput[region, , to[["secondary"]]]) + moved - primaryPart
   }
   if (shortfall > 10^-6) {
     toolStatusMessage("warn", paste0("forest crosswalk limited by available area, up to ",

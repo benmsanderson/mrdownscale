@@ -12,18 +12,27 @@ input <- landData(list(primf = 20, secdf = 30, pltns = 10, primn = 20, secdn = 2
 target <- landData(list(primf = 20, secdf = 30, pltns = 0, primn = 20, secdn = 20))
 target["B.2", , "secdf"] <- 45  # A: 50 of forest against 60; B: 65 against 60
 
-test_that("surplus forest moves to non-forest, primary to primary, secondary to secondary", {
+test_that("surplus forest is taken as the input's forest is composed, given as the target's non-forest is", {
   x <- toolForestCrosswalk(input, target, year = 2025)
 
-  # A's 10 Mha surplus splits as its forest does, 20:30 primary to secondary
-  expect_equal(as.vector(x["A.1", 2025, c("primf", "secdf", "primn", "secdn")]), c(16, 24, 24, 26))
+  # A's 10 Mha surplus is taken 20:30 from primary and secondary forest and
+  # given 20:20 to primary and secondary non-forest, as the target holds them
+  expect_equal(as.vector(x["A.1", 2025, c("primf", "secdf", "primn", "secdn")]), c(16, 24, 25, 25))
+
+  skewed <- target
+  skewed["A.1", , "primn"] <- 30
+  skewed["A.1", , "secdn"] <- 10
+  x <- toolForestCrosswalk(input, skewed, year = 2025)
+  expect_equal(as.vector(x["A.1", 2025, c("primn", "secdn")]), c(27.5, 22.5))
 })
 
 test_that("a forest shortfall comes back from non-forest the same way", {
   x <- toolForestCrosswalk(input, target, year = 2025)
 
-  # B is 5 Mha short, drawn from non-forest 20:20 primary to secondary
-  expect_equal(as.vector(x["B.2", 2025, c("primf", "secdf", "primn", "secdn")]), c(22.5, 32.5, 17.5, 17.5))
+  # B is 5 Mha short, drawn from non-forest 20:20 and given to forest as the
+  # target's forest is composed, 20:45
+  expect_equal(as.vector(x["B.2", 2025, c("primf", "secdf", "primn", "secdn")]),
+               c(20 + 5 * 20 / 65, 30 + 5 * 45 / 65, 17.5, 17.5))
 })
 
 test_that("every category keeps its change over time, so primary land cannot expand", {
