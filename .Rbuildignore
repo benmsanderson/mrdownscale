@@ -18,3 +18,4 @@
 ^LICENSE\.md$
 ^\.claude$
 ^_pkgdown\.yml$
+^release$
