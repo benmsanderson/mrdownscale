@@ -2,10 +2,10 @@
 # environment; the defaults are CICERO's cic-nac cluster.
 
 # this fork's release, and the graft commit it is built with
-RELEASE=${RELEASE:-v0.1}
+RELEASE=${RELEASE:-v0-1}
 TAG=${TAG:-r01}                       # suffix of the output folders, <marker><TAG>_iamc
 GRAFT_REPO=${GRAFT_REPO:-https://github.com/benmsanderson/graft.git}
-GRAFT_REF=${GRAFT_REF:-473ba0f0413e2c12a79ad9557d9f869de18a58e5}
+GRAFT_REF=${GRAFT_REF:-ca74e07c87f96f541df3c6ae36d5f77864ea2ef6}
 GRAFT_DIR=${GRAFT_DIR:-$PWD/graft}    # a checkout at GRAFT_REF, cloned if missing
 GRAFT_PY=${GRAFT_PY:-$GRAFT_DIR/.venv/bin/python}
 

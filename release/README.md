@@ -24,7 +24,15 @@ changes to the fork's package or to the graft checkout, uses a fresh madrat
 main folder (so an empty cache), and writes `WORK/manifest.txt` with the code
 commits, input checksums and environment.
 
-To check that a build reproduces an earlier one:
+To package a finished build as release datasets (split at 2100, LUH3's
+conventions, README and checksums per dataset), checking it against an
+earlier build on the way:
+
+```bash
+REFERENCE=<earlier>/output REFTAG=x7 release/package.sh
+```
+
+To check that a build reproduces an earlier one by hand:
 
 ```bash
 python graft/scripts/compare_products.py WORK/madrat/output/vlr01_iamc <earlier>/vlx7_iamc
