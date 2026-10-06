@@ -5,7 +5,7 @@
 RELEASE=${RELEASE:-v0.1}
 TAG=${TAG:-r01}                       # suffix of the output folders, <marker><TAG>_iamc
 GRAFT_REPO=${GRAFT_REPO:-https://github.com/benmsanderson/graft.git}
-GRAFT_REF=${GRAFT_REF:-cf278e693d64b8fe77cad7a1455356d97442f532}
+GRAFT_REF=${GRAFT_REF:-50b012396274976f3c5608980359e2f6790f060e}
 GRAFT_DIR=${GRAFT_DIR:-$PWD/graft}    # a checkout at GRAFT_REF, cloned if missing
 GRAFT_PY=${GRAFT_PY:-$GRAFT_DIR/.venv/bin/python}
 
