@@ -15,6 +15,8 @@ source "$FORK/release/config.sh"
 MARKERS=${*:-$MARKERS_DEFAULT}
 eval "$R_SETUP" >/dev/null 2>&1 || true
 export LC_ALL=C.UTF-8 HDF5_USE_FILE_LOCKING=FALSE
+# the cluster Python module puts its own packages on PYTHONPATH; the venv is the environment
+unset PYTHONPATH
 export OMP_NUM_THREADS=$THREADS OPENBLAS_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS \
        R_DATATABLE_NUM_THREADS=$THREADS MC_CORES=$THREADS
 
