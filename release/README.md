@@ -5,8 +5,9 @@ annual, on the LUH3 0.25 degree grid, 2020-2500, from the public IIASA
 ScenarioMIP R10 release and LUH3 history. It is fork-only; nothing here is
 proposed upstream.
 
-The products are **not LUH3** and not an official CMIP7 forcing. They are a
-documented backup built with this fork of mrdownscale (branch
+The products are land-use inputs produced rapidly from regionally aggregated
+public IAM data, independent of LUH3 and not part of the official CMIP7
+forcing datasets. They are built with this fork of mrdownscale (branch
 `graft/primary-forest-harvest`) and graft (Python post-processing and
 diagnostics, pinned in `config.sh`).
 
