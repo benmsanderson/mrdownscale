@@ -42,16 +42,27 @@ python graft/scripts/compare_products.py WORK/madrat/output/vlr01_iamc <earlier>
 
 | input | where | pinned by |
 |---|---|---|
-| IIASA ScenarioMIP release, R10 regions (`ScenarioMIP_v0.1_R10.xlsx`) | IIASA ScenarioMIP database | sha256 in the manifest |
+| IIASA ScenarioMIP release, R10 regions (`ScenarioMIP_v0.1_R10.xlsx`, "ScenarioMIP/CMIP7 Ensemble - Data at the R10 region level", Release v0.1, September 2026) | ScenarioMIP Explorer, https://scenariomip.apps.ece.iiasa.ac.at, after accepting its licence; set `IAMC_XLSX` to the downloaded file | sha256 `73bc5c5c972e8dd80d8456e57c528bb2930787547f27c2e869a8273ddfece92b` (also in the manifest) |
 | LUH3 history, `UofMD-landState-3-1-1` (states, transitions, management, static) | input4MIPs / ESGF | file names in the manifest; `graft/scripts/fetch_luh3.py` downloads them checksum-verified |
 | R10 region membership per model | `graft/data/region_mappings` | graft commit |
 | country of each grid cell | `graft/data/country_cell.csv.gz` (built by `graft/scripts/luh_country_mask.py` from LUH3's `ccode` and Natural Earth) | graft commit |
 | GLM's harvest probability table | `graft/src/graft/data/phbio.average.7states.txt` (CMIP6 GLM; Hurtt et al. 2020) | graft commit |
 
+**The IIASA release is not redistributed here.** Its licence
+(https://scenariomip.apps.ece.iiasa.ac.at/license) permits reuse for
+scientific analysis but prohibits redistributing substantial parts of the
+data, and asks users to work from the current release; the file must be
+downloaded by whoever runs the build. A later release changes the checksum,
+and the build then makes a different product.
+
 ## Environment
 
 - R 4.4.2; packages as `renv.lock` (written from the library the products
-  were made with; `renv::restore(lockfile = "release/renv.lock")`).
+  were made with). PIK's packages, served by r-universe at their latest
+  version only, are pinned to their exact GitHub commits, so the lock still
+  restores once newer versions are out:
+  `renv::restore(lockfile = "release/renv.lock", library = <empty library>)`;
+  a GitHub token (`GITHUB_PAT`) avoids API rate limits.
 - Python 3.12; packages as `graft/requirements-lock.txt`.
 
 ## The flow
