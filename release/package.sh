@@ -25,9 +25,10 @@ one() {
    if [ -n "${REFERENCE:-}" ]; then
      "$GRAFT_PY" scripts/compare_products.py "$build" "$REFERENCE/${k}${REFTAG}_iamc" --stride 25
    fi &&
-   "$GRAFT_PY" scripts/package_release.py "$build" "$k" "$OUT" --version "${RELEASE#v}" --manifest "$WORK/package_manifest.txt" &&
-   "$GRAFT_PY" scripts/check_closure.py "$OUT/CICERO-graft-landState-$k-${RELEASE#v}" --stride 20 &&
-   "$GRAFT_PY" scripts/check_closure.py "$OUT/CICERO-graft-landState-$k-ext-${RELEASE#v}" --stride 100) \
+   "$GRAFT_PY" scripts/package_release.py "$build" "$k" "$OUT" --version "${RELEASE#v}" --manifest "$WORK/package_manifest.txt" \
+     --prefix "$DATASET_PREFIX" --institutions $INSTITUTIONS &&
+   "$GRAFT_PY" scripts/check_closure.py "$OUT/$DATASET_PREFIX-$k-${RELEASE#v}" --stride 20 &&
+   "$GRAFT_PY" scripts/check_closure.py "$OUT/$DATASET_PREFIX-$k-ext-${RELEASE#v}" --stride 100) \
     > "$WORK/logs/package_$k.log" 2>&1
   echo "$k: exit $? $(date)"
 }

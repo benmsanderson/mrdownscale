@@ -5,13 +5,18 @@
 RELEASE=${RELEASE:-v0-1}
 TAG=${TAG:-r01}                       # suffix of the output folders, <marker><TAG>_iamc
 GRAFT_REPO=${GRAFT_REPO:-https://github.com/benmsanderson/graft.git}
-GRAFT_REF=${GRAFT_REF:-5f55dc3c01fb69954446d7701d0e14578c3a9f10}
+GRAFT_REF=${GRAFT_REF:-54efaeb0f457a6f8f044674e9ce9e6841bf57d14}
 GRAFT_DIR=${GRAFT_DIR:-$PWD/graft}    # a checkout at GRAFT_REF, cloned if missing
 GRAFT_PY=${GRAFT_PY:-$GRAFT_DIR/.venv/bin/python}
 
 # inputs
 IAMC_XLSX=${IAMC_XLSX:-/storage/no-backup-nac/users/bensan/graft/ScenarioMIP_v0.1_R10.xlsx}
 export GRAFT_LUH3=${GRAFT_LUH3:-/storage/no-backup-nac/LUH2/cmip7/UofMD-landState-3-1-1}
+
+# the released datasets' name, <DATASET_PREFIX>-<marker>[-ext]-<version>, and the
+# institutes releasing them (institution_id CICERO, or CICERO-PIK with "CICERO PIK")
+DATASET_PREFIX=${DATASET_PREFIX:-CICERO-graft-landState}
+INSTITUTIONS=${INSTITUTIONS:-CICERO}
 
 # where the build writes: a fresh madrat main folder (sources, cache, output)
 WORK=${WORK:-$PWD/work-$TAG}
