@@ -65,6 +65,19 @@ and the build then makes a different product.
   a GitHub token (`GITHUB_PAT`) avoids API rate limits.
 - Python 3.12; packages as `graft/requirements-lock.txt`.
 
+## Verified
+
+- 6-7 October 2026: `build.sh` from an empty cache (fresh graft clone, Python
+  environment from the lock) reproduced all seven markers bit for bit
+  against the products analysed during development (11 files per marker,
+  largest difference 0).
+- 8 October 2026: the R lock restored into an empty library (94 packages
+  installed, the other 59 supplied at the locked versions by the cluster's R
+  installation), and VL rebuilt with only that library: bit for bit again.
+  A machine without those 59 packages installs them from the lock too; that
+  path is untested.
+- The fork's test suite passes at `graft-v0.1` (43 tests, 176 expectations).
+
 ## The flow
 
 For each marker:
