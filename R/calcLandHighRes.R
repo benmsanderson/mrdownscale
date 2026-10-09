@@ -37,7 +37,20 @@ calcLandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, har
 
   mapping <- calcOutput("ResolutionMapping", input = input, target = target, aggregate = FALSE)
 
-  if (downscaling == "magpieClassic") {
+  # IAMC input carries no spatial information within regions; take natural
+  # non-forest land for expansion in proportion to LUH3's potential biomass,
+  # which keeps it off desert and ice
+  iamcOnLuh3 <- startsWith(input, "iamc") && target == "luh3"
+  if (downscaling == "magpieClassic" && iamcOnLuh3) {
+    potentialBiomass <- readSource("LUH3", subtype = "potentialBiomass", convert = FALSE)
+    potentialBiomass <- collapseDim(as.magpie(potentialBiomass), 3)
+    out <- toolDownscaleWeighted(x[, getYears(x, as.integer = TRUE) >= max(histYears), ],
+                                 xTarget[, max(histYears), ],
+                                 xTargetLowRes = landTargetLowRes,
+                                 mapping = mapping,
+                                 weight = potentialBiomass)
+    out <- out[, getYears(out, as.integer = TRUE) > max(histYears), ]
+  } else if (downscaling == "magpieClassic") {
     out <- toolDownscaleMagpieClassic(x[, getYears(x, as.integer = TRUE) >= max(histYears), ],
                                       xTarget[, max(histYears), ],
                                       xTargetLowRes = landTargetLowRes,
@@ -52,7 +65,7 @@ calcLandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, har
   # IAMC input carries the reporting model's forest dynamics, which ignore
   # where LUH's potential vegetation allows forest; apply LUH's rule for
   # secondary land so gains land where LUH would put them
-  secondaryLandRule <- startsWith(input, "iamc") && target == "luh3"
+  secondaryLandRule <- iamcOnLuh3
   if (secondaryLandRule) {
     potentialForest <- readSource("LUH3", subtype = "potentialForest", convert = FALSE)
     potentialForest <- collapseDim(as.magpie(potentialForest), 3)
