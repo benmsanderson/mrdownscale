@@ -32,6 +32,7 @@ Options marked *opt-in* leave upstream's default output unchanged.
 | IAMC wood harvest and fertilizer | `64afe7a` `65b24eb` `ad69db6` `53dd312` `ccaa796` | nonland input from reported roundwood and nitrogen, split with LUH3's history |
 | forest and urban definitions | `976d009` `335629b` `e310623` | IAMC forest and urban land put on LUH's definitions before harmonizing (crosswalks) |
 | secondary land | `8088012` | LUH's rule for secondary land when downscaling IAMC input |
+| where expansion goes | `61288d3` | when downscaling IAMC input onto LUH3, primn and secdn losses taken in proportion to LUH3's potential biomass (`ptbio`), not evenly, so new cropland stays off desert and ice (2024-2100 on land below 0.5 kg C/m2, before: M 125 Mha, H 126 Mha; LUH3 16, 42); equal weights give interpolate2 |
 | fadeForest time step | `fe778bf` | primary forest's extrapolated decline per year, not per output step (upstream PR #72) |
 | primary forest from wood demand | `7e3cd0a` | *opt-in* harmonization `fadeForestHarvest`, below |
 | ScenarioMIP writer: gross transitions | `dcbece9` `51a86a4` | *opt-in* gross transitions, and plantations folded into secondary forest to match the states |
