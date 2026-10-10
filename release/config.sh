@@ -29,5 +29,6 @@ R_SETUP=${R_SETUP:-"source /etc/profile.d/z00_lmod.sh; module load R/4.4.2-gfbf-
 OPTS=${OPTS:-gross,fold,harvest}
 YEAR_END=${YEAR_END:-2150}
 MARKERS_DEFAULT="vl l ln m ml h hl"
-PARALLEL=${PARALLEL:-2}               # marker runs at a time; HDF5 is unreliable beyond 2
+PARALLEL=${PARALLEL:-2}               # marker runs at a time; 6 at once once corrupted HDF5 writes (with file locking on)
 THREADS=${THREADS:-12}
+STAGGER=${STAGGER:-60}                # seconds between marker starts

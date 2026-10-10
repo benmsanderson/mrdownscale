@@ -76,7 +76,7 @@ for k in $MARKERS; do
   build_one "$k" &
   running=$((running + 1))
   if [ "$running" -ge "$PARALLEL" ]; then wait -n; running=$((running - 1)); fi
-  sleep 60   # staggered, so two runs do not compute the same LUH3 target at once
+  sleep "$STAGGER"   # staggered, so two runs do not compute the same LUH3 target at once
 done
 wait
 echo "done $(date); manifest: $WORK/manifest.txt"
