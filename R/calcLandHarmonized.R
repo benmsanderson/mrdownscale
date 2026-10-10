@@ -28,7 +28,13 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   toolExpectLessDiff(inSum[, 1, ], tSum[, 1, ], 10^-5,
                      "Total areas are the same in target and input data")
 
-  xInput <- toolEqualizeArea(xInput, xTarget[, harmonizationPeriod[1], ])
+  # for IAMC input the area a model's region and the target's differ by is
+  # natural land (ice, water, boundaries), so it does not scale managed land
+  if (startsWith(input, "iamc")) {
+    xInput <- toolEqualizeAreaNatural(xInput, xTarget[, harmonizationPeriod[1], ])
+  } else {
+    xInput <- toolEqualizeArea(xInput, xTarget[, harmonizationPeriod[1], ])
+  }
 
   # IAMC forest follows the reporting model's definition, not LUH's, and the
   # harmonizers all converge on the input's forest total; shift the level onto
@@ -50,6 +56,12 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
                       primfHarvest = magclass::setNames(primfHarvest, "primf"))
   } else {
     out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  }
+
+  # IAMC models report no primary non-forest land, so its split from secdn
+  # follows conversions, not the input's split. See toolPrimnFromConversion.
+  if (startsWith(input, "iamc")) {
+    out <- toolPrimnFromConversion(out, harmonizationPeriod[1])
   }
 
   attr(out, "geometry") <- geometry
