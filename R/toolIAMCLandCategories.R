@@ -86,6 +86,16 @@ toolIAMCLandCategories <- function(x) {
     forest * 0
   }
   reportedSplit <- all(forestParts %in% getItems(out, dim = 3))
+  # where a region-year's parts do not add up to its forest total, a planted
+  # figure cannot be told from the parts it contradicts; take planted forest's
+  # share of the total from the region's nearest year where they do add up.
+  # MESSAGE reports India+ planted forest jumping 49 to 108 Mha in 2100 with
+  # primary and secondary flat and the total up 2.6 Mha, which read as it
+  # stands would turn most of the region's natural forest into plantations
+  if (reportedSplit && "Land_Cover_Forest_Planted" %in% getItems(out, dim = 3)) {
+    planted <- toolPlantedFromConsistentYears(planted, forest,
+                                              dimSums(out[, , c(forestParts, "Land_Cover_Forest_Planted")], dim = 3))
+  }
   usableSplit <- FALSE
   if (reportedSplit) {
     partSum <- dimSums(out[, , c(forestParts, "Land_Cover_Forest_Planted")[

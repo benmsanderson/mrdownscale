@@ -21,8 +21,15 @@
 #' geometry information \code{attr(x, "geometry")}.
 #' @param crs the coordinate reference system as returned by \code{attr(x, "crs")} from
 #' a magpie object with coordinates information.
+#' @param target name of the target dataset. For "luh3" the LUH state categories
+#' (primf, primn, secdf, secdn, urban, pastr, range) are weighted by LUH3's own
+#' last historical year, 2024, so that an input category is split as the target
+#' splits it where the scenario begins. Otherwise, and by default, they are
+#' weighted by the LUH2 2015 states shipped with the package; LUH2 2015 carries
+#' 801 Mha of pasture where LUH3 2024 carries less, which gave too much pasture
+#' even with LUH3's own totals as input.
 #' @author Jan Philipp Dietrich
-calcLandCategorizationWeight <- function(map, geometry, crs) {
+calcLandCategorizationWeight <- function(map, geometry, crs, target = NULL) {
   stopifnot(c("reference", "dataInput", "merge") %in% colnames(map))
 
   .getTarget <- function(geometry, crs) {
@@ -78,8 +85,20 @@ calcLandCategorizationWeight <- function(map, geometry, crs) {
     return(luh2)
   }
 
+  .getLUH3SpatRaster <- function(map) {
+    categories <- c("primf", "primn", "secdf", "secdn", "urban", "pastr", "range")
+    categories <- categories[categories %in% map$reference]
+    states <- readSource("LUH3", subtype = "states", subset = 2024, convert = FALSE)
+    cellAreaMha <- readSource("LUH3", subtype = "cellArea", convert = FALSE) / 10^4
+    x <- states[[paste0("y2024..", categories)]] * cellAreaMha
+    # each LUH state is its own reference category, so mapping it to its merged
+    # category is a renaming, as .remap does for the LUH2 layers
+    names(x) <- map$merge[match(categories, map$reference)]
+    return(x)
+  }
+
   toolbox <- .getToolboxSpatRaster(map)
-  luh2 <- .getLUH2SpatRaster(map)
+  luh2 <- if (identical(target, "luh3")) .getLUH3SpatRaster(map) else .getLUH2SpatRaster(map)
 
   # project toolbox and luh2 data on x
   target <- .getTarget(geometry, crs)

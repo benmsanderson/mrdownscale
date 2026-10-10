@@ -4,10 +4,18 @@
 #' then disaggregate again in a way that minimizes primf to secdf conversion,
 #' without exceeding linear extrapolation of primf.
 #'
+#' With \code{primfHarvest} the split follows the scenario instead of history:
+#' see \code{\link{toolPrimfFromHarvest}}.
+#'
 #' @inheritParams toolHarmonizeFade
+#' @param primfHarvest optional magpie object, regions by years, the primary
+#' forest harvest area in Mha per year that the scenario's wood demand implies
+#' at the target's historical primary share (\code{wood_harvest_area} of
+#' primf from \code{\link{calcNonlandInputRecategorized}}). NULL keeps the
+#' linear extrapolation.
 #' @inherit toolHarmonizeFade return
 #' @author Pascal Sauer
-toolHarmonizeFadeForest <- function(xInput, xTarget, harmonizationPeriod) {
+toolHarmonizeFadeForest <- function(xInput, xTarget, harmonizationPeriod, primfHarvest = NULL) {
   hp1 <- harmonizationPeriod[1]
 
   x <- toolHarmonizeFade(xInput, xTarget, harmonizationPeriod)
@@ -17,6 +25,15 @@ toolHarmonizeFadeForest <- function(xInput, xTarget, harmonizationPeriod) {
     return(x)
   }
   forest <- dimSums(x[, years >= hp1, psf], 3)
+
+  if (!is.null(primfHarvest)) {
+    primf <- toolPrimfFromHarvest(forest, xTarget[, hp1, "primf"], primfHarvest)
+    primsecdf <- mbind(primf, magclass::setNames(forest - primf, "secdf"))
+    stopifnot(primsecdf >= 0,
+              abs(forest - dimSums(primsecdf, 3)) < 10^-10)
+    x[, years >= hp1, psf] <- primsecdf
+    return(x)
+  }
 
   # linear extrapolation of primf, don't want to exceed this, also ensures some primf is always harvested
   primfTarget <- xTarget[, getYears(xTarget, TRUE) <= hp1, "primf"]
