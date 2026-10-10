@@ -20,3 +20,13 @@ test_that("years up to the harmonization start are unchanged", {
   expect_equal(as.vector(out[, c(2020, 2025), ]), as.vector(x[, c(2020, 2025), ]))
   expect_equal(as.vector(out[, 2030, "primn"]), 60)
 })
+
+test_that("harvest from primary non-forest land moves it to secdn", {
+  x <- new.magpie("A", c(2025, 2030), c("primn", "secdn"), fill = 0)
+  x[, , "primn"] <- c(60, 60)
+  x[, , "secdn"] <- c(30, 30)
+  harvest <- new.magpie("A", c(2025, 2030), "primn", fill = 2)
+  out <- toolPrimnFromConversion(x, 2025, harvest)
+  expect_equal(as.vector(out[, 2030, "primn"]), 50)
+  expect_equal(as.vector(out[, 2030, "secdn"]), 40)
+})

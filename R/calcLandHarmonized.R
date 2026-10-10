@@ -59,9 +59,13 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   }
 
   # IAMC models report no primary non-forest land, so its split from secdn
-  # follows conversions, not the input's split. See toolPrimnFromConversion.
+  # follows conversion and harvest, as primary forest does, not the input's split. See toolPrimnFromConversion.
   if (startsWith(input, "iamc")) {
-    out <- toolPrimnFromConversion(out, harmonizationPeriod[1])
+    primnHarvest <- NULL
+    if (harmonization == "fadeForestHarvest") {
+      primnHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primn"], dim = 3)
+    }
+    out <- toolPrimnFromConversion(out, harmonizationPeriod[1], primnHarvest)
   }
 
   attr(out, "geometry") <- geometry
