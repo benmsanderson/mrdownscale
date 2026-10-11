@@ -65,7 +65,7 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   }
 
   harmonizer <- toolGetHarmonizer(harmonization)
-  if (harmonization == "fadeForestHarvest") {
+  if (harmonization %in% c("fadeForestHarvest", "absoluteChangesHarvest")) {
     # primary forest follows the scenario's own wood demand: the primary
     # harvest area it implies at the target's historical share
     nonland <- calcOutput("NonlandInputRecategorized", input = input, target = target, aggregate = FALSE)
@@ -80,7 +80,7 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   # follows conversion and harvest, as primary forest does, not the input's split. See toolPrimnFromConversion.
   if (startsWith(input, "iamc")) {
     primnHarvest <- NULL
-    if (harmonization == "fadeForestHarvest") {
+    if (harmonization %in% c("fadeForestHarvest", "absoluteChangesHarvest")) {
       primnHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primn"], dim = 3)
     }
     out <- toolPrimnFromConversion(out, harmonizationPeriod[1], primnHarvest)
@@ -105,7 +105,7 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
                      xTarget[, getYears(xTarget, as.integer = TRUE) <= harmonizationPeriod[1], ],
                      10^-5, "Returning reference data before harmonization period")
 
-  if (harmonization != "absoluteChanges") {
+  if (!startsWith(harmonization, "absoluteChanges")) {
     outAfterHarmonization <- out[, getYears(out, as.integer = TRUE) >= harmonizationPeriod[2], ]
     inputAfterHarmonization <- xInput[, getYears(xInput, as.integer = TRUE) >= harmonizationPeriod[2], ]
     nonprimfix <- setdiff(getItems(out, dim = 3), c("primf", "primn", "secdf", "secdn"))
