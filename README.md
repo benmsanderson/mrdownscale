@@ -37,6 +37,8 @@ Options marked *opt-in* leave upstream's default output unchanged.
 | primary non-forest land | `e7e1275` `aaf75a8` `2cd3a28` | for IAMC input, primn and secdn re-split after harmonization by the primary forest rule (`toolPrimnFromConversion`): primn declines only by its share of net loss and by its harvest area, never by relabelling (the forest crosswalk had moved up to 270 Mha of a region's primn into secdn) |
 | fadeForest time step | `fe778bf` | primary forest's extrapolated decline per year, not per output step (upstream PR #72) |
 | primary forest from wood demand | `7e3cd0a` | *opt-in* harmonization `fadeForestHarvest`, below |
+| IAM changes on the target's level | `2ed011c` | *opt-in* harmonization `absoluteChangesHarvest`: upstream's `absoluteChanges` for land, primary forest from wood demand as under `fadeForestHarvest`, nonland faded; below |
+| fertilizer without crop area | `133ea34` | a crop type with fertilizer but no area gets a rate of 0, not Inf, which netCDF cannot store (`absoluteChanges` can empty a crop type the input still fertilizes) |
 | ScenarioMIP writer: gross transitions | `dcbece9` `51a86a4` | *opt-in* gross transitions, and plantations folded into secondary forest to match the states |
 | ScenarioMIP writer: LUH3 harvest semantics | `373451d` `3e3d041` `58781ef` | with gross transitions only; below (`4b32916`, a re-routing of primary clearing, was tried and withdrawn in `58da5c2`; the cell-by-cell rule of `58781ef` restores it on a different ground) |
 | ScenarioMIP writer: time axis, history splice | `c5d4e9f` | a decodable time axis; output starts from LUH3 history |
@@ -91,6 +93,14 @@ forest in proportion to their biomass. There is no free parameter, and at the
 harmonization year the split is the target's own. Land harmonization now reads
 the nonland chain for the primary harvest area; that is the method, and it is
 opt-in.
+
+`absoluteChangesHarvest` (`2ed011c`, opt-in) keeps the same primary forest
+rule but harmonizes land with upstream's `absoluteChanges`: each category's
+change in the input since the harmonization year is added to the target's
+level that year, instead of fading to the input's own levels. The ScenarioMIP
+markers then keep each IAM's regional changes, as LUH3 does: under
+`fadeForestHarvest`, the H marker's Latin American cropland grew by 85 Mha
+against GCAM's 48 (LUH3: 49), and under `absoluteChangesHarvest` by 49.
 
 **3. IAMC urban land on LUH's level (`e310623`).** Models report built-up area
 on their own definitions or not at all: against LUH3's 86 Mha in 2025, GCAM

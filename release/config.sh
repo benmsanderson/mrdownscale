@@ -5,7 +5,7 @@
 RELEASE=${RELEASE:-v0-1}
 TAG=${TAG:-r01}                       # suffix of the output folders, <marker><TAG>_iamc
 GRAFT_REPO=${GRAFT_REPO:-https://github.com/benmsanderson/graft.git}
-GRAFT_REF=${GRAFT_REF:-54efaeb0f457a6f8f044674e9ce9e6841bf57d14}
+GRAFT_REF=${GRAFT_REF:-24855b506fd9a71ac7696aea870edc3515c05792}
 GRAFT_DIR=${GRAFT_DIR:-$PWD/graft}    # a checkout at GRAFT_REF, cloned if missing
 GRAFT_PY=${GRAFT_PY:-$GRAFT_DIR/.venv/bin/python}
 
@@ -25,8 +25,9 @@ WORK=${WORK:-$PWD/work-$TAG}
 R_SETUP=${R_SETUP:-"source /etc/profile.d/z00_lmod.sh; module load R/4.4.2-gfbf-2024a GDAL/3.10.0-foss-2024a GEOS/3.12.2-GCC-13.3.0 PROJ/9.4.1-GCCcore-13.3.0 netCDF/4.9.2-gompi-2024a"}
 
 # the product: gross transitions, plantations folded into secondary forest,
-# primary forest from wood demand; to 2150 on the extension ramp, then 2500
-OPTS=${OPTS:-gross,fold,harvest}
+# primary forest from wood demand, the IAM's changes on LUH3's 2025 level; to
+# 2150 on the extension ramp, then 2500
+OPTS=${OPTS:-gross,fold,harvest,abs}
 YEAR_END=${YEAR_END:-2150}
 MARKERS_DEFAULT="vl l ln m ml h hl"
 PARALLEL=${PARALLEL:-2}               # marker runs at a time; 6 at once once corrupted HDF5 writes (with file locking on)
