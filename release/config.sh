@@ -15,8 +15,8 @@ export GRAFT_LUH3=${GRAFT_LUH3:-/storage/no-backup-nac/LUH2/cmip7/UofMD-landStat
 
 # the released datasets' name, <DATASET_PREFIX>-<marker>[-ext]-<version>, and the
 # institutes releasing them (institution_id CICERO, or CICERO-PIK with "CICERO PIK")
-DATASET_PREFIX=${DATASET_PREFIX:-CICERO-graft-landState}
-INSTITUTIONS=${INSTITUTIONS:-CICERO}
+DATASET_PREFIX=${DATASET_PREFIX:-CICERO-PIK-mrdownscale-landState}
+INSTITUTIONS=${INSTITUTIONS:-"CICERO PIK"}
 
 # where the build writes: a fresh madrat main folder (sources, cache, output)
 WORK=${WORK:-$PWD/work-$TAG}
