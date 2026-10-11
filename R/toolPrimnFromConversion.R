@@ -34,7 +34,8 @@ toolPrimnFromConversion <- function(x, year, primnHarvest = NULL) {
   if (is.null(primnHarvest)) {
     primnHarvest <- new.magpie(getItems(x, dim = 1), year, "primn", fill = 0)
   }
-  primn <- toolPrimfFromHarvest(natural, x[, year, "primn"], collapseDim(primnHarvest, dim = 3))
+  primn <- toolPrimfFromHarvest(natural, x[, year, "primn"], collapseDim(primnHarvest, dim = 3),
+                                label = "primary non-forest land")
   primn <- magclass::setNames(primn, "primn")
   x[, after, "primn"] <- primn
   x[, after, "secdn"] <- magclass::setNames(natural, "secdn") - magclass::setNames(primn, "secdn")

@@ -30,9 +30,10 @@
 #' @param primfHarvest magpie object, regions by years, primary forest harvest
 #' area in Mha per year at the historical primary share; interpolated to the
 #' years of \code{forest} and held constant beyond its ends
+#' @param label what the land is, for the status message
 #' @return magpie object, regions by years of \code{forest}, primary forest in Mha
 #' @author Ben Sanderson
-toolPrimfFromHarvest <- function(forest, primf0, primfHarvest) {
+toolPrimfFromHarvest <- function(forest, primf0, primfHarvest, label = "primary forest") {
   regions <- getItems(forest, dim = 1)
   stopifnot(setequal(regions, getItems(primfHarvest, dim = 1)),
             setequal(regions, getItems(primf0, dim = 1)),
@@ -74,7 +75,7 @@ toolPrimfFromHarvest <- function(forest, primf0, primfHarvest) {
     primf <- mbind(primf, setYears(next_, year))
     previousYear <- year
   }
-  toolStatusMessage("note", paste0("primary forest from the scenario's wood demand: global loss ",
+  toolStatusMessage("note", paste0(label, " from the scenario's wood demand: global loss ",
                                    round(sum(primf[, hp1, ]) - sum(primf[, max(years), ]), 1),
                                    " Mha over ", hp1, "-", max(years)))
   return(primf)
