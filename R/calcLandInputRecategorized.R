@@ -33,7 +33,7 @@ calcLandInputRecategorized <- function(input, target) {
   map <- toolLandCategoriesMapping(input, target)
   # get weights for disaggregation to reference categories
   ref <- calcOutput("LandCategorizationWeight", map = map, geometry = attr(x, "geometry"),
-                    crs = attr(x, "crs"), aggregate = FALSE)
+                    crs = attr(x, "crs"), target = target, aggregate = FALSE)
   y   <- toolAggregate(x, map, dim = 3, from = "dataInput", to = "merge", weight = ref)
   out <- toolAggregate(y, map, dim = 3, from = "merge",     to = "dataOutput")
 

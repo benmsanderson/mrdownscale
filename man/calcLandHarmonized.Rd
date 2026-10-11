@@ -13,7 +13,9 @@ calcLandHarmonized(input, target, harmonizationPeriod, harmonization)
 
 \item{harmonizationPeriod}{Two integer values, before the first given
 year the target dataset is used, after the second given year the input
-dataset is used, in between harmonize between the two datasets}
+dataset is used, in between harmonize between the two datasets.
+For harmonization = "absoluteChanges" both values must be the same, the
+harmonization year, which must be present in the target dataset.}
 
 \item{harmonization}{name of harmonization method, see \code{\link{toolGetHarmonizer}}}
 }

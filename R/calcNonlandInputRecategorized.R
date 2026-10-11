@@ -69,7 +69,8 @@ calcNonlandInputRecategorized <- function(input, target, youngShareWoodHarvestAr
 
   x <- mbind(youngWeight, matureWeight, youngArea, matureArea, x[, , "secdforest", invert = TRUE])
 
-  ref <- calcOutput("LandCategorizationWeight", map = map, geometry = geometry, crs = crs, aggregate = FALSE)
+  ref <- calcOutput("LandCategorizationWeight", map = map, geometry = geometry, crs = crs,
+                    target = target, aggregate = FALSE)
   x <- mbind(x[, , "fertilizer", invert = TRUE],
              toolRecategorizeFertilizer(x[, , "fertilizer"], ref, map, landInput))
 

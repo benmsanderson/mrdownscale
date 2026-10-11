@@ -6,7 +6,7 @@
 #' match magpie semantics years are shifted by 1 when reading transitions.
 #' The LUH3 nc files have day-based time, which is converted to years.
 #'
-#' @param subtype one of states, management, transitions, cellArea, potentialForest
+#' @param subtype one of states, management, transitions, cellArea, potentialForest, potentialBiomass
 #' @param subset which years to read
 #' @return data read from LUH3 historic nc files as SpatRaster
 #'
@@ -22,6 +22,11 @@ readLUH3 <- function(subtype, subset) {
     potentialForest <- terra::rast("multiple-static_input4MIPs_landState_CMIP_UofMD-landState-3-1-1_gn.nc",
                                    "fstnf")
     return(list(x = potentialForest, class = "SpatRaster", cache = FALSE, unit = "1"))
+  }
+  if (subtype == "potentialBiomass") {
+    potentialBiomass <- terra::rast("multiple-static_input4MIPs_landState_CMIP_UofMD-landState-3-1-1_gn.nc",
+                                    "ptbio")
+    return(list(x = potentialBiomass, class = "SpatRaster", cache = FALSE, unit = "kg C m-2"))
   }
 
   years <- intersect(subset, 850:2024)

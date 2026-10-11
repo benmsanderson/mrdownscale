@@ -9,16 +9,34 @@
 #' @param target name of the land target source to be used
 #' @param harmonizationPeriod Two integer values, before the first given
 #' year the target dataset is used, after the second given year the input
-#' dataset is used, in between harmonize between the two datasets
+#' dataset is used, in between harmonize between the two datasets.
+#' For harmonization = "absoluteChanges" both values must be set to the same
+#' harmonization year, which must match a time step in both datasets.
 #' @param harmonization name of harmonization method, see \code{\link{toolGetHarmonizer}}
 #' @author Pascal Sauer, Jan Philipp Dietrich
 calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization) {
+  if (length(harmonizationPeriod) != 2 ||
+        anyNA(harmonizationPeriod) || any(round(harmonizationPeriod) != harmonizationPeriod)) {
+    stop("harmonizationPeriod must always be two integer values")
+  }
+  if (harmonization == "absoluteChanges" && harmonizationPeriod[1] != harmonizationPeriod[2]) {
+    stop("harmonizationPeriod must be two equal integer values for ",
+         "harmonization = \"absoluteChanges\"")
+  }
+
   xInput <- calcOutput("LandInputRecategorized", input = input, target = target, aggregate = FALSE)
   geometry <- attr(xInput, "geometry")
   crs <- attr(xInput, "crs")
 
-  xTarget <- calcOutput("LandTargetExtrapolated", input = input, target = target,
-                        harmonizationPeriod = harmonizationPeriod, aggregate = FALSE)
+  # absoluteChanges only uses the target data up to the harmonization year,
+  # no extrapolation is needed
+  if (harmonization == "absoluteChanges") {
+    xTarget <- calcOutput("LandTargetLowRes", input = input, target = target,
+                          endOfHistory = harmonizationPeriod[1], aggregate = FALSE)
+  } else {
+    xTarget <- calcOutput("LandTargetExtrapolated", input = input, target = target,
+                          harmonizationPeriod = harmonizationPeriod, aggregate = FALSE)
+  }
 
   # checks and corrections
   inSum <- dimSums(xInput, dim = 3)
@@ -28,18 +46,45 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
   toolExpectLessDiff(inSum[, 1, ], tSum[, 1, ], 10^-5,
                      "Total areas are the same in target and input data")
 
-  xInput <- toolEqualizeArea(xInput, xTarget[, harmonizationPeriod[1], ])
+  # for IAMC input the area a model's region and the target's differ by is
+  # natural land (ice, water, boundaries), so it does not scale managed land
+  if (startsWith(input, "iamc")) {
+    xInput <- toolEqualizeAreaNatural(xInput, xTarget[, harmonizationPeriod[1], ])
+  } else {
+    xInput <- toolEqualizeArea(xInput, xTarget[, harmonizationPeriod[1], ])
+  }
 
   # IAMC forest follows the reporting model's definition, not LUH's, and the
   # harmonizers all converge on the input's forest total; shift the level onto
   # the target's definition at the start of harmonization, keeping the
-  # input's forest changes. See toolForestCrosswalk.
+  # input's forest changes. See toolForestCrosswalk. Urban land gets the same
+  # treatment, since models report it on their own definitions or not at all.
   if (startsWith(input, "iamc")) {
     xInput <- toolForestCrosswalk(xInput, xTarget, year = harmonizationPeriod[1])
+    xInput <- toolUrbanCrosswalk(xInput, xTarget, year = harmonizationPeriod[1])
   }
 
   harmonizer <- toolGetHarmonizer(harmonization)
-  out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  if (harmonization %in% c("fadeForestHarvest", "absoluteChangesHarvest")) {
+    # primary forest follows the scenario's own wood demand: the primary
+    # harvest area it implies at the target's historical share
+    nonland <- calcOutput("NonlandInputRecategorized", input = input, target = target, aggregate = FALSE)
+    primfHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primf"], dim = 3)
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod,
+                      primfHarvest = magclass::setNames(primfHarvest, "primf"))
+  } else {
+    out <- harmonizer(xInput, xTarget, harmonizationPeriod = harmonizationPeriod)
+  }
+
+  # IAMC models report no primary non-forest land, so its split from secdn
+  # follows conversion and harvest, as primary forest does, not the input's split. See toolPrimnFromConversion.
+  if (startsWith(input, "iamc")) {
+    primnHarvest <- NULL
+    if (harmonization %in% c("fadeForestHarvest", "absoluteChangesHarvest")) {
+      primnHarvest <- collapseDim(nonland[, , "wood_harvest_area"][, , "primn"], dim = 3)
+    }
+    out <- toolPrimnFromConversion(out, harmonizationPeriod[1], primnHarvest)
+  }
 
   attr(out, "geometry") <- geometry
   attr(out, "crs")      <- crs
@@ -60,19 +105,23 @@ calcLandHarmonized <- function(input, target, harmonizationPeriod, harmonization
                      xTarget[, getYears(xTarget, as.integer = TRUE) <= harmonizationPeriod[1], ],
                      10^-5, "Returning reference data before harmonization period")
 
-  outAfterHarmonization <- out[, getYears(out, as.integer = TRUE) >= harmonizationPeriod[2], ]
-  inputAfterHarmonization <- xInput[, getYears(xInput, as.integer = TRUE) >= harmonizationPeriod[2], ]
-  nonprimfix <- setdiff(getItems(out, dim = 3), c("primf", "primn", "secdf", "secdn"))
-  toolExpectLessDiff(outAfterHarmonization[, , nonprimfix],
-                     inputAfterHarmonization[, , nonprimfix],
-                     10^-5, "Returning input data after harmonization period (not checking primf/primn/secdf/secdn)")
-  toolExpectLessDiff(dimSums(outAfterHarmonization[, , c("primf", "secdf")], 3),
-                     dimSums(inputAfterHarmonization[, , c("primf", "secdf")], 3),
-                     10^-5, "Returning input data after harmonization period (checking primf + secdf)")
-  if ("primn" %in% getItems(out, 3)) {
-    toolExpectLessDiff(dimSums(outAfterHarmonization[, , c("primn", "secdn")], 3),
-                       dimSums(inputAfterHarmonization[, , c("primn", "secdn")], 3),
-                       10^-5, "Returning input data after harmonization period (checking primn + secdn)")
+  if (!startsWith(harmonization, "absoluteChanges")) {
+    outAfterHarmonization <- out[, getYears(out, as.integer = TRUE) >= harmonizationPeriod[2], ]
+    inputAfterHarmonization <- xInput[, getYears(xInput, as.integer = TRUE) >= harmonizationPeriod[2], ]
+    nonprimfix <- setdiff(getItems(out, dim = 3), c("primf", "primn", "secdf", "secdn"))
+    toolExpectLessDiff(outAfterHarmonization[, , nonprimfix],
+                       inputAfterHarmonization[, , nonprimfix],
+                       10^-5,
+                       "Returning input data after harmonization period (not checking primf/primn/secdf/secdn)")
+    toolExpectLessDiff(dimSums(outAfterHarmonization[, , c("primf", "secdf")], 3),
+                       dimSums(inputAfterHarmonization[, , c("primf", "secdf")], 3),
+                       10^-5, "Returning input data after harmonization period (checking primf + secdf)")
+    if ("primn" %in% getItems(out, 3)) {
+      toolExpectLessDiff(dimSums(outAfterHarmonization[, , c("primn", "secdn")], 3),
+                         dimSums(inputAfterHarmonization[, , c("primn", "secdn")], 3),
+                         10^-5,
+                         "Returning input data after harmonization period (checking primn + secdn)")
+    }
   }
 
   return(list(x = out,

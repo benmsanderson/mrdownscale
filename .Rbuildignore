@@ -18,3 +18,7 @@
 ^LICENSE\.md$
 ^\.claude$
 ^_pkgdown\.yml$
+^release$
+^CODE_STYLE\.md$
+^AGENTS\.md$
+^CONTRIBUTING\.md$
