@@ -24,4 +24,5 @@
 ^CODE_STYLE\.md$
 ^AGENTS\.md$
 ^CONTRIBUTING\.md$
-^plotting$
+^CLAUDE.md$
+^AGENTS.md$
