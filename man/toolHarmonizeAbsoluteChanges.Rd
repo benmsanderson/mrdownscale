@@ -4,7 +4,12 @@
 \alias{toolHarmonizeAbsoluteChanges}
 \title{toolHarmonizeAbsoluteChanges}
 \usage{
-toolHarmonizeAbsoluteChanges(xInput, xTarget, harmonizationPeriod)
+toolHarmonizeAbsoluteChanges(
+  xInput,
+  xTarget,
+  harmonizationPeriod,
+  constantTotal
+)
 }
 \arguments{
 \item{xInput}{input data as magpie object}
@@ -14,11 +19,13 @@ toolHarmonizeAbsoluteChanges(xInput, xTarget, harmonizationPeriod)
 \item{harmonizationPeriod}{Two identical integer values, the year the
 absolute changes of the input data are applied to, must be present in both
 input and target data}
+
+\item{constantTotal}{TRUE if the total area of each cell is constant over time}
 }
 \value{
 harmonized data set as magpie object with data from target for years
-  up to and including the harmonization year and absolute changes from input
-  relative to the harmonization year afterwards
+up to and including the harmonization year and absolute changes from input
+relative to the harmonization year afterwards
 }
 \description{
 Tool function for creating a harmonized data set by applying the absolute
@@ -32,11 +39,18 @@ Negative values are handled within groups of related categories (forest &
 other land; all cropland types; pasture & rangeland), so that they are
 compensated by the other categories of the group. For crops, negative values
 are first compensated by the corresponding rainfed/irrigated twin of the
-same crop, which keeps that pair's total area, including biofuel types like
-c3ann_rainfed_biofuel_1st_gen. Crop categories without their twin are
+same crop. Crop categories without their twin are
 compensated by the whole group. Groups with a negative total area are set to
 zero. Afterwards, if any negatives remain, all categories except urban are
 scaled down to keep the total area constant.
+
+primf and primn cannot regrow, so if they were scaled down to compensate
+that would persist in all later timesteps (toolReplaceExpansion caps prim
+areas at previous timestep). Hence they are only scaled down once all other
+variables in their group were scaled down to zero first.
+This group compensation and constant total area applies only to data whose
+total area is constant (constantTotal = TRUE). For constantTotal = FALSE data
+negative values are simply clamped to zero.
 }
 \author{
 Pascal Sauer

@@ -41,27 +41,3 @@ test_that("primary forest neither grows back nor exceeds forest", {
   expect_true(all(primf >= 0))
   expect_true(all(as.vector(primf) <= c(100, 30, 0)))
 })
-
-test_that("fadeForest with primary harvest keeps the harmonized forest total", {
-  categories <- c("primf", "secdf")
-  xTarget <- new.magpie("A.1", c(2015:2025, 2030, 2040), categories, fill = 0)
-  xTarget[, 2015:2025, "primf"] <- 100 - 2 * (0:10)
-  xTarget[, c(2030, 2040), "primf"] <- c(70, 50)
-  xTarget[, , "secdf"] <- 200
-  xInput <- new.magpie("A.1", c(2025, 2030, 2040, 2050), categories, fill = 0)
-  xInput[, , "primf"] <- 80
-  xInput[, , "secdf"] <- 200
-  harvest <- new.magpie("A.1", c(2025, 2030, 2040, 2050), "primf", fill = 0.5)
-
-  withHarvest <- toolHarmonizeFadeForest(xInput, xTarget, c(2025, 2050), primfHarvest = harvest)
-  upstream <- toolHarmonizeFadeForest(xInput, xTarget, c(2025, 2050))
-
-  expect_equal(dimSums(withHarvest[, , categories], dim = 3), dimSums(upstream[, , categories], dim = 3))
-  # a demand of 0.5 Mha per year, against history's 2, keeps more primary forest
-  expect_true(all(withHarvest[, 2050, "primf"] > upstream[, 2050, "primf"]))
-  # the first step: five years of the demanded harvest, plus the primary
-  # share of whatever forest the fade takes away
-  forest <- as.vector(dimSums(upstream[, c(2025, 2030), categories], dim = 3))
-  cleared <- max(forest[1] - forest[2], 0)
-  expect_equal(as.vector(withHarvest[, 2030, "primf"]), 80 - 5 * 0.5 - cleared * 80 / forest[1])
-})

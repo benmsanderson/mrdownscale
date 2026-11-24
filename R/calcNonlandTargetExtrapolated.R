@@ -3,15 +3,15 @@
 #' Aggregated low resolution target data is extrapolated to the given years
 #' using toolExtrapolate. To extrapolate wood harvest weight (bioh) multiply
 #' wood harvest area already extrapolated by calcLandTargetExtrapolated with
-#' the wood harvest rate in kg C per Mha of the last historical year (see
-#' \code{\link{toolHarvestDensity}}). Fertilizer is extrapolated
+#' the historical wood harvest rate in kg C per Mha. Fertilizer is extrapolated
 #' and returned in kg ha-1 yr-1.
 #'
 #' @inheritParams calcNonlandInput
 #' @param target name of a target dataset, see \code{\link{calcLandTarget}}
 #' for available target datasets
 #' @param harmonizationPeriod Two integer values, will extrapolate to all years
-#' present in input data between harmonization start and end year
+#' present in input data between harmonization start and end year. If both
+#' values are equal, the target data up to that year is returned unchanged.
 #' @return extrapolated nonland target data
 #'
 #' @examples
@@ -28,6 +28,15 @@ calcNonlandTargetExtrapolated <- function(input, target, harmonizationPeriod) {
   xTarget <- calcOutput("NonlandTargetLowRes", input = input, target = target,
                         endOfHistory = hp[1], aggregate = FALSE)
 
+  # if harmonization start and end year are equal, no extrapolation is needed
+  if (hp[1] == hp[2]) {
+    return(list(x = xTarget,
+                isocountries = FALSE,
+                unit = "harvest_weight & bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: kg ha-1 yr-1",
+                min = 0,
+                description = "Extrapolated nonland target data for harmonization"))
+  }
+
   transitionYears <- inputYears[inputYears > max(getYears(xTarget, TRUE))
                                 & inputYears < hp[2]]
 
@@ -35,8 +44,12 @@ calcNonlandTargetExtrapolated <- function(input, target, harmonizationPeriod) {
   exFertilizer[exFertilizer < 0] <- 0
   exFertilizer[exFertilizer > max(xTarget[, , "fertilizer"])] <- max(xTarget[, , "fertilizer"])
 
-  # kg C per Mha harvested, as at the end of history
-  kgCPerMha <- toolHarvestDensity(xTarget[, , "bioh"], xTarget[, , "wood_harvest_area"])
+  # calculate kg C per Mha in historical period
+  histBioh <- dimSums(xTarget[, , "bioh"], 2)
+  histHarvestArea <- dimSums(xTarget[, , "wood_harvest_area"], 2)
+  kgCPerMha <- 1 / histHarvestArea * collapseDim(histBioh) # order is important here for correct dims
+  kgCPerMha[is.nan(kgCPerMha)] <- 0
+  stopifnot(is.finite(kgCPerMha))
 
   # get wood harvest area extrapolation, then apply historical kg C per Mha
   xLand <- calcOutput("LandTargetExtrapolated", input = input, target = target,

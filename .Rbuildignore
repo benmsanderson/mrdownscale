@@ -1,3 +1,4 @@
+^\.git$
 ^.*\.Rproj$
 ^.*CITATION.cff$
 ^.lintr$
@@ -17,8 +18,12 @@
 ^vignettes/.lintr$
 ^LICENSE\.md$
 ^\.claude$
+^\.worktrees$
+^plot-.*\.png$
 ^_pkgdown\.yml$
 ^release$
 ^CODE_STYLE\.md$
 ^AGENTS\.md$
 ^CONTRIBUTING\.md$
+^CLAUDE.md$
+^AGENTS.md$
