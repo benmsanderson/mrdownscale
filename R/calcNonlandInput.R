@@ -118,6 +118,8 @@ calcNonlandInput <- function(input) { # before adding args, consider: many funct
       toolStatusMessage("warn", "Negative values detected, replacing with 0.")
       out[out < 0] <- 0
     }
+    # as the land input (calcLandInput)
+    out <- toolInterpolateYear(out, 2024)
 
     mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
     out <- toolAggregate(out, unique(mapping[, c("region", "lowRes")]))

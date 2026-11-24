@@ -205,6 +205,8 @@ calcLandInput <- function(input) { # before adding args, consider: many function
     }
 
     out <- toolIAMCLandCategories(x)
+    # LUH3's history ends in 2024, the year absoluteChanges anchors at
+    out <- toolInterpolateYear(out, 2024)
 
     # artificial region numbers/ids as these are expected later
     mapping <- readSource("IAMC", subtype = "regionMapping", convert = FALSE)
