@@ -34,7 +34,8 @@ calcNonlandTargetExtrapolated <- function(input, target, harmonizationPeriod) {
                 isocountries = FALSE,
                 unit = "harvest_weight & bioh: kg C yr-1; harvest_area: Mha yr-1; fertilizer: kg ha-1 yr-1",
                 min = 0,
-                description = "Extrapolated nonland target data for harmonization"))
+                description = "Extrapolated nonland target data for harmonization",
+                clean_magpie = !startsWith(input, "iamc")))
   }
 
   transitionYears <- inputYears[inputYears > max(getYears(xTarget, TRUE))
