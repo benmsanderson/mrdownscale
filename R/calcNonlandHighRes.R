@@ -36,6 +36,16 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
   x <- x[, getYears(x, as.integer = TRUE) %in% yearsSubset, ]
 
   nonlandTarget <- calcOutput("NonlandTarget", target = target, endOfHistory = hp[1], aggregate = FALSE)
+  # IAMC input: the target's harvest area over its last ten years, to downscale harvest where it happens
+  if (startsWith(input, "iamc")) {
+    histYears <- intersect(seq(hp[1] - 9, hp[1]), terra::time(nonlandTarget))
+    histHarvest <- nonlandTarget[[terra::time(nonlandTarget) %in% histYears &
+                                    grepl("wood_harvest_area$", names(nonlandTarget))]]
+    histHarvest <- as.magpie(histHarvest)
+    getItems(histHarvest, 3, raw = TRUE) <- sub("^(.+?)_(.+)$", "\\2.\\1", getItems(histHarvest, 3))
+    names(dimnames(histHarvest))[3] <- "category.data"
+    histHarvest <- dimSums(histHarvest, dim = 2) / length(histYears)
+  }
   nonlandTarget <- as.magpie(nonlandTarget[[terra::time(nonlandTarget) %in% yearsSubset]])
   getItems(nonlandTarget, 3, raw = TRUE) <- sub("^(.+?)_(.+)$", "\\2.\\1", getItems(nonlandTarget, 3))
   names(dimnames(nonlandTarget))[3] <- "category.data"
@@ -53,6 +63,21 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
   harvestAreaWeight <- toolMaxHarvestPerYear(landHighRes)[, futureYears, ]
   harvestAreaDownscaled <- toolAggregate(harvestArea, resmap, weight = harvestAreaWeight,
                                          from = "lowRes", to = "cell", dim = 1, zeroWeight = "fix")
+  if (startsWith(input, "iamc")) {
+    # an IAM region is large: weighting by land alone would move its secondary harvest into
+    # countries that barely harvest, so keep the target's pattern (harvest per unit of land at the
+    # end of history); primary harvest stays with the land, where the downscaled primary decline is
+    sec <- grep("\\.(sec|pltns)", getItems(harvestArea, 3), value = TRUE)
+    landYears <- getYears(landHighRes, as.integer = TRUE)
+    landEnd <- toolMaxHarvestPerYear(landHighRes, timestepAdjust = FALSE)
+    landEnd <- landEnd[, landYears[which(landYears == hp[1]) + 1], sec]
+    histHarvest <- histHarvest[getItems(landEnd, 1), , sec]
+    intensity <- setYears(histHarvest, NULL) / setYears(landEnd, NULL)
+    intensity[!is.finite(intensity)] <- 0
+    secDownscaled <- toolHarvestAreaDownscale(harvestArea[, , sec], resmap, harvestAreaWeight[, , sec], intensity)
+    harvestAreaDownscaled[, , sec] <- secDownscaled[getItems(harvestAreaDownscaled, 1),
+                                                    getYears(harvestAreaDownscaled), sec]
+  }
 
   message("downscaling wood harvest mass...")
   bioh <- x[, futureYears, "bioh"]
