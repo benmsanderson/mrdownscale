@@ -74,6 +74,15 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
     histHarvest <- histHarvest[getItems(landEnd, 1), , sec]
     intensity <- setYears(histHarvest, NULL) / setYears(landEnd, NULL)
     intensity[!is.finite(intensity)] <- 0
+    # LUH3 has no plantation harvest; plantations are carved out of its secdf, so they take secdf's
+    pltns <- grep("\\.pltns$", sec, value = TRUE)
+    secdf <- grep("\\.(secyf|secmf)$", sec, value = TRUE)
+    if (length(pltns) == 1 && length(secdf) > 0 && sum(histHarvest[, , pltns]) <= 0) {
+      secdfLand <- setYears(landEnd[, , secdf[1]], NULL)
+      secdfIntensity <- dimSums(setYears(histHarvest[, , secdf], NULL), dim = 3) / secdfLand
+      secdfIntensity[!is.finite(secdfIntensity)] <- 0
+      intensity[, , pltns] <- as.vector(secdfIntensity)
+    }
     secDownscaled <- toolHarvestAreaDownscale(harvestArea[, , sec], resmap, harvestAreaWeight[, , sec], intensity)
     harvestAreaDownscaled[, , sec] <- secDownscaled[getItems(harvestAreaDownscaled, 1),
                                                     getYears(harvestAreaDownscaled), sec]
