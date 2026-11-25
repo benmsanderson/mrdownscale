@@ -39,3 +39,13 @@ test_that("a region without history falls back to land, and caps pass harvest on
   expect_equal(sum(out[paste0("c", 1:3), , ]), 3)
   expect_true(all(out <= maxHarvest))
 })
+
+test_that("secyf and secmf share their secdf", {
+  items <- c("wood_harvest_area.secyf", "wood_harvest_area.secmf")
+  maxHarvest <- new.magpie(paste0("c", 1:4), 2025, items, fill = c(2, 10, 10, 5))
+  intensity <- new.magpie(paste0("c", 1:4), NULL, items, fill = c(1, 0, 0, 1))
+  harvest <- new.magpie(c("A", "B"), 2025, items, fill = c(2, 1, 2, 1))
+  out <- toolHarvestAreaDownscale(harvest, resmap, maxHarvest, intensity)
+  expect_lte(sum(out["c1", , ]), 2 + 1e-9)
+  expect_equal(as.vector(dimSums(out[paste0("c", 1:3), , ], dim = 1)), c(2, 2))
+})

@@ -9,7 +9,8 @@
 #' region harvested a category in the target's history, the weight is the land
 #' itself. No cell harvests more than maxHarvest; what a cap holds back goes to
 #' the region's other cells, by weight, and once those are full to its
-#' remaining land.
+#' remaining land. secyf and secmf are both harvested from secdf, so they share
+#' one cap: secyf gets what secmf leaves.
 #'
 #' Downscaling by land alone moves harvest wherever land of the right type is,
 #' which for a large low resolution unit (an IAM region) can put a region's
@@ -44,11 +45,18 @@ toolHarvestAreaDownscale <- function(harvestArea, resmap, maxHarvest, intensity,
 
   out <- maxHarvest[, years, items]
   out[] <- 0
+  # secyf and secmf both come out of secdf: do secmf first, secyf takes the rest
+  pool <- sub("^.*\\.", "", items)
+  items <- items[order(pool == "secyf")]
+  shared <- items[sub("^.*\\.", "", items) %in% c("secyf", "secmf")]
   for (item in items) {
     rate <- as.vector(intensity[, , item])
     rate[!is.finite(rate) | rate < 0] <- 0
     for (year in years) {
       cap <- pmax(as.vector(maxHarvest[, year, item]), 0)
+      if (item %in% shared && length(shared) > 1) {
+        cap <- pmax(cap - as.vector(dimSums(out[, year, setdiff(shared, item)], dim = 3)), 0)
+      }
       target <- pmax(as.vector(harvestArea[, year, item]), 0)
       target[is.na(target)] <- 0
       weight <- cap * rate
