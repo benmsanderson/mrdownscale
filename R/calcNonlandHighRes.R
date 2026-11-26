@@ -40,7 +40,7 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
   if (startsWith(input, "iamc")) {
     histYears <- intersect(seq(hp[1] - 9, hp[1]), terra::time(nonlandTarget))
     histHarvest <- nonlandTarget[[terra::time(nonlandTarget) %in% histYears &
-                                    grepl("wood_harvest_area$", names(nonlandTarget))]]
+                                    grepl("(wood_harvest_area|bioh)$", names(nonlandTarget))]]
     histHarvest <- as.magpie(histHarvest)
     getItems(histHarvest, 3, raw = TRUE) <- sub("^(.+?)_(.+)$", "\\2.\\1", getItems(histHarvest, 3))
     names(dimnames(histHarvest))[3] <- "category.data"
@@ -63,30 +63,6 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
   harvestAreaWeight <- toolMaxHarvestPerYear(landHighRes)[, futureYears, ]
   harvestAreaDownscaled <- toolAggregate(harvestArea, resmap, weight = harvestAreaWeight,
                                          from = "lowRes", to = "cell", dim = 1, zeroWeight = "fix")
-  if (startsWith(input, "iamc")) {
-    # an IAM region is large: weighting by land alone would move its secondary harvest into
-    # countries that barely harvest, so keep the target's pattern (harvest per unit of land at the
-    # end of history); primary harvest stays with the land, where the downscaled primary decline is
-    sec <- grep("\\.(sec|pltns)", getItems(harvestArea, 3), value = TRUE)
-    landYears <- getYears(landHighRes, as.integer = TRUE)
-    landEnd <- toolMaxHarvestPerYear(landHighRes, timestepAdjust = FALSE)
-    landEnd <- landEnd[, landYears[which(landYears == hp[1]) + 1], sec]
-    histHarvest <- histHarvest[getItems(landEnd, 1), , sec]
-    intensity <- setYears(histHarvest, NULL) / setYears(landEnd, NULL)
-    intensity[!is.finite(intensity)] <- 0
-    # LUH3 has no plantation harvest; plantations are carved out of its secdf, so they take secdf's
-    pltns <- grep("\\.pltns$", sec, value = TRUE)
-    secdf <- grep("\\.(secyf|secmf)$", sec, value = TRUE)
-    if (length(pltns) == 1 && length(secdf) > 0 && sum(histHarvest[, , pltns]) <= 0) {
-      secdfLand <- setYears(landEnd[, , secdf[1]], NULL)
-      secdfIntensity <- dimSums(setYears(histHarvest[, , secdf], NULL), dim = 3) / secdfLand
-      secdfIntensity[!is.finite(secdfIntensity)] <- 0
-      intensity[, , pltns] <- as.vector(secdfIntensity)
-    }
-    secDownscaled <- toolHarvestAreaDownscale(harvestArea[, , sec], resmap, harvestAreaWeight[, , sec], intensity)
-    harvestAreaDownscaled[, , sec] <- secDownscaled[getItems(harvestAreaDownscaled, 1),
-                                                    getYears(harvestAreaDownscaled), sec]
-  }
 
   message("downscaling wood harvest mass...")
   bioh <- x[, futureYears, "bioh"]
@@ -95,6 +71,42 @@ calcNonlandHighRes <- function(input, target, harmonizationPeriod, yearsSubset, 
   stopifnot(setequal(getItems(weightBioh, 3), getItems(bioh, 3)))
   biohDownscaled <- toolAggregate(bioh, resmap, weight = weightBioh, from = "lowRes", to = "cell",
                                   dim = 1, zeroWeight = "fix")
+
+  if (startsWith(input, "iamc")) {
+    # an IAM region is large: weighting by land alone would move its secondary harvest into
+    # countries that barely harvest, so keep the target's pattern (harvest per unit of land at the
+    # end of history); primary harvest stays with the land, where the downscaled primary decline is.
+    # Carbon gets its own pattern: biomass per harvested area differs some fiftyfold within a region
+    pools <- sub("^.*\\.", "", grep("\\.(sec|pltns)", getItems(harvestArea, 3), value = TRUE))
+    landYears <- getYears(landHighRes, as.integer = TRUE)
+    landEnd <- toolMaxHarvestPerYear(landHighRes, timestepAdjust = FALSE)
+    landEnd <- setYears(landEnd[, landYears[which(landYears == hp[1]) + 1], paste0("wood_harvest_area.", pools)], NULL)
+    histHarvest <- setYears(histHarvest[getItems(landEnd, 1), , ], NULL)
+    intensityOf <- function(category) {
+      h <- histHarvest[, , paste0(category, ".", pools)]
+      out <- h / setNames(landEnd, paste0(category, ".", pools))
+      out[!is.finite(out)] <- 0
+      # LUH3 has no plantation harvest; plantations are carved out of its secdf, so they take secdf's
+      secdf <- intersect(c("secyf", "secmf"), pools)
+      if ("pltns" %in% pools && length(secdf) > 0 && sum(h[, , paste0(category, ".pltns")]) <= 0) {
+        secdfIntensity <- as.vector(dimSums(h[, , paste0(category, ".", secdf)], dim = 3)) /
+          as.vector(landEnd[, , paste0("wood_harvest_area.", secdf[1])])
+        secdfIntensity[!is.finite(secdfIntensity)] <- 0
+        out[, , paste0(category, ".pltns")] <- secdfIntensity
+      }
+      return(out)
+    }
+    areaItems <- paste0("wood_harvest_area.", pools)
+    secArea <- toolHarvestAreaDownscale(harvestArea[, , areaItems], resmap, harvestAreaWeight[, , areaItems],
+                                        intensityOf("wood_harvest_area"))
+    harvestAreaDownscaled[, , areaItems] <- secArea[getItems(harvestAreaDownscaled, 1),
+                                                    getYears(harvestAreaDownscaled), areaItems]
+    biohItems <- paste0("bioh.", pools)
+    biohLand <- harvestAreaWeight[, , areaItems]
+    getItems(biohLand, 3.1) <- "bioh"
+    secBioh <- toolHarvestAreaDownscale(bioh[, , biohItems], resmap, biohLand, intensityOf("bioh"), capped = FALSE)
+    biohDownscaled[, , biohItems] <- secBioh[getItems(biohDownscaled, 1), getYears(biohDownscaled), biohItems]
+  }
 
   # fertilizer is in kg ha-1 yr-1 already, use low res/region value for each cell corresponding to that region
   fertilizerDownscaled <- setCells(x[resmap$lowRes, futureYears, "fertilizer"], resmap$cell)

@@ -9,7 +9,8 @@ toolHarvestAreaDownscale(
   resmap,
   maxHarvest,
   intensity,
-  rounds = 20
+  rounds = 20,
+  capped = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ as returned by toolMaxHarvestPerYear}
 historical harvest area per unit of land (0 where there was none)}
 
 \item{rounds}{iterations to place what the caps hold back}
+
+\item{capped}{if FALSE, maxHarvest only weights and caps nothing (for harvest carbon)}
 }
 \value{
 magpie object with harvest area per cell

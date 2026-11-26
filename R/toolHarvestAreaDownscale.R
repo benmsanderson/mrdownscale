@@ -25,9 +25,10 @@
 #' @param intensity magpie object, cells, one year, same items as harvestArea:
 #' historical harvest area per unit of land (0 where there was none)
 #' @param rounds iterations to place what the caps hold back
+#' @param capped if FALSE, maxHarvest only weights and caps nothing (for harvest carbon)
 #' @return magpie object with harvest area per cell
 #' @author Benjamin Sanderson
-toolHarvestAreaDownscale <- function(harvestArea, resmap, maxHarvest, intensity, rounds = 20) {
+toolHarvestAreaDownscale <- function(harvestArea, resmap, maxHarvest, intensity, rounds = 20, capped = TRUE) {
   items <- getItems(harvestArea, 3)
   years <- getYears(harvestArea)
   stopifnot(setequal(getItems(maxHarvest, 3), items), setequal(getItems(intensity, 3), items),
@@ -54,7 +55,7 @@ toolHarvestAreaDownscale <- function(harvestArea, resmap, maxHarvest, intensity,
     rate[!is.finite(rate) | rate < 0] <- 0
     for (year in years) {
       cap <- pmax(as.vector(maxHarvest[, year, item]), 0)
-      if (item %in% shared && length(shared) > 1) {
+      if (capped && item %in% shared && length(shared) > 1) {
         cap <- pmax(cap - as.vector(dimSums(out[, year, setdiff(shared, item)], dim = 3)), 0)
       }
       target <- pmax(as.vector(harvestArea[, year, item]), 0)
@@ -62,6 +63,7 @@ toolHarvestAreaDownscale <- function(harvestArea, resmap, maxHarvest, intensity,
       weight <- cap * rate
       noHistory <- sumBy(weight) <= 0
       weight[noHistory[region]] <- cap[noHistory[region]]
+      if (!capped) cap[] <- Inf
       total <- sumBy(weight)
       share <- ifelse(total[region] > 0, weight / total[region], 0)
       area <- pmin(target[region] * share, cap)

@@ -49,3 +49,11 @@ test_that("secyf and secmf share their secdf", {
   expect_lte(sum(out["c1", , ]), 2 + 1e-9)
   expect_equal(as.vector(dimSums(out[paste0("c", 1:3), , ], dim = 1)), c(2, 2))
 })
+
+test_that("uncapped, the land only weights (for harvest carbon)", {
+  maxHarvest <- cellsOf(list(c(1, 10, 10, 5)), 2025)
+  intensity <- cellsOf(list(c(4, 1, 0, 1)), NULL)
+  carbon <- new.magpie(c("A", "B"), 2025, "wood_harvest_area.secmf", fill = c(140, 7))
+  out <- toolHarvestAreaDownscale(carbon, resmap, maxHarvest, intensity, capped = FALSE)
+  expect_equal(as.vector(out[paste0("c", 1:4), , ]), c(40, 100, 0, 7))
+})
